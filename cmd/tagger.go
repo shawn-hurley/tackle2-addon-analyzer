@@ -1,13 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/konveyor/tackle2-addon/command"
 	"github.com/konveyor/tackle2-hub/api"
-	"io"
 	"math/rand"
-	"os"
-	pathlib "path"
+	"strings"
 )
 
 //
@@ -19,9 +16,6 @@ type Tagger struct {
 //
 // AddOptions adds analyzer options.
 func (r *Tagger) AddOptions(options *command.Options) (err error) {
-	if r.Enabled {
-		options.Add("--exportSummary")
-	}
 	return
 }
 
@@ -30,12 +24,8 @@ func (r *Tagger) AddOptions(options *command.Options) (err error) {
 //   - Ensures categories exist.
 //   - Endures tags exist.
 //   - Replaces associated tags (by source).
-func (r *Tagger) Update(appID uint) (err error) {
+func (r *Tagger) Update(appID uint, report *Report) (err error) {
 	addon.Activity("[TAG] Tagging Application %d.", appID)
-	report, err := r.report()
-	if err != nil {
-		return
-	}
 	catMap, err := r.ensureCategories(report)
 	if err != nil {
 		return
@@ -52,47 +42,24 @@ func (r *Tagger) Update(appID uint) (err error) {
 }
 
 //
-// report reads and returns the json summary.
-// Returns the summary.
-func (r *Tagger) report() (report []Summary, err error) {
-	path := pathlib.Join(ReportDir, "analysisSummary.json")
-	f, err := os.Open(path)
-	if err != nil {
-		return
-	}
-	defer func() {
-		_ = f.Close()
-	}()
-	b, err := io.ReadAll(f)
-	if err != nil {
-		return
-	}
-	report = []Summary{}
-	err = json.Unmarshal(b, &report)
-	if err != nil {
-		return
-	}
-	return
-}
-
-//
 // ensureCategories ensures categories exist.
 // Returns the map of category names to IDs.
-func (r *Tagger) ensureCategories(report []Summary) (mp map[string]uint, err error) {
+func (r *Tagger) ensureCategories(report *Report) (mp map[string]uint, err error) {
 	mp = map[string]uint{}
 	wanted := []api.TagCategory{}
-	for i := range report {
-		for _, tag := range report[i].Tags {
-			mp[tag.Category] = 0
+	for _, s := range report.Tags {
+		colon := strings.Index(s, ":")
+		if colon > 0 {
+			mp[s[:colon]] = 0
 		}
-		for name := range mp {
-			wanted = append(
-				wanted,
-				api.TagCategory{
-					Name: name,
-					Rank: uint(rand.Intn(10)),
-				})
-		}
+	}
+	for name := range mp {
+		wanted = append(
+			wanted,
+			api.TagCategory{
+				Name: name,
+				Rank: uint(rand.Intn(10)),
+			})
 	}
 	for _, cat := range wanted {
 		err = addon.TagCategory.Ensure(&cat)
@@ -107,24 +74,29 @@ func (r *Tagger) ensureCategories(report []Summary) (mp map[string]uint, err err
 //
 // ensureTags ensures tags exist.
 // Returns the wanted tag IDs.
-func (r *Tagger) ensureTags(catMap map[string]uint, report []Summary) (tags []uint, err error) {
+func (r *Tagger) ensureTags(catMap map[string]uint, report *Report) (tags []uint, err error) {
 	mp := map[TagRef]int{}
 	wanted := []api.Tag{}
-	for i := range report {
-		for _, ref := range report[i].Tags {
+	for _, s := range report.Tags {
+		colon := strings.Index(s, ":")
+		if colon > 0 {
+			ref := TagRef{
+				Category: s[:colon],
+				Name:     s[colon:],
+			}
 			mp[ref] = 0
 		}
-		for ref := range mp {
-			catRef := api.Ref{
-				ID: catMap[ref.Category],
-			}
-			wanted = append(
-				wanted,
-				api.Tag{
-					Name:     ref.Name,
-					Category: catRef,
-				})
+	}
+	for ref := range mp {
+		catRef := api.Ref{
+			ID: catMap[ref.Category],
 		}
+		wanted = append(
+			wanted,
+			api.Tag{
+				Name:     ref.Name,
+				Category: catRef,
+			})
 	}
 	for _, tag := range wanted {
 		err = addon.Tag.Ensure(&tag)
@@ -146,13 +118,7 @@ func (r *Tagger) ensureAssociated(appID uint, wanted []uint) (err error) {
 }
 
 //
-// Summary analyzer object.
-type Summary struct {
-	Tags []TagRef `json:"technologyTags"`
-}
-
-//
-// TagRef is a tag name & category.
+// TagRef -
 type TagRef struct {
 	Name     string `json:"name"`
 	Category string `json:"category"`

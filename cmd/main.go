@@ -207,7 +207,7 @@ func main() {
 		//
 		// Tagging.
 		if d.Tagger.Enabled {
-			err = d.Tagger.Update(application.ID)
+			err = d.Tagger.Update(application.ID, "<path needed>")
 			if err != nil {
 				return
 			}

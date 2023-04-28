@@ -1,5 +1,5 @@
 GOBIN ?= ${GOPATH}/bin
-IMG   ?= quay.io/konveyor/tackle2-addon-windup:latest
+IMG   ?= quay.io/konveyor/tackle2-addon-analyzer:latest
 
 all: cmd
 
@@ -16,7 +16,7 @@ podman-build:
 	podman build -t ${IMG} .
 
 cmd: fmt vet
-	go build -ldflags="-w -s" -o bin/addon github.com/konveyor/tackle2-addon-windup/cmd
+	go build -ldflags="-w -s" -o bin/addon github.com/konveyor/tackle2-addon-analyzer/cmd
 
 .PHONY: start-minikube
 START_MINIKUBE_SH = ./bin/start-minikube.sh

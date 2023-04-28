@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/konveyor/analyzer-lsp/hubapi"
+	"github.com/konveyor/analyzer-lsp/provider/lib"
 	"github.com/konveyor/tackle2-addon/command"
 	"github.com/konveyor/tackle2-addon/repository"
 	"github.com/konveyor/tackle2-hub/api"
@@ -11,16 +13,25 @@ import (
 )
 
 //
+// ProviderSettings LSP provider settings.
+type ProviderSettings = lib.Config
+
+//
+// Report Analysis report.
+type Report = hubapi.RuleSet
+
+//
 // Analyzer application analyzer.
 type Analyzer struct {
 	application *api.Application
+	settings    ProviderSettings
 	*Data
 }
 
 //
 // Run analyzer.
 func (r *Analyzer) Run() (err error) {
-	cmd := command.Command{Path: "/opt/analyzer"}
+	cmd := command.Command{Path: "/usr/bin/konveyor-analyzer"}
 	cmd.Options, err = r.options()
 	if err != nil {
 		return
@@ -33,8 +44,6 @@ func (r *Analyzer) Run() (err error) {
 // options builds CLL options.
 func (r *Analyzer) options() (options command.Options, err error) {
 	options = command.Options{
-		"--exitCodes",
-		"--batchMode",
 		"--output",
 		ReportDir,
 	}
@@ -94,8 +103,6 @@ type Mode struct {
 	Binary     bool   `json:"binary"`
 	Artifact   string `json:"artifact"`
 	WithDeps   bool   `json:"withDeps"`
-	Diva       bool   `json:"diva"`
-	CSV        bool   `json:"csv"`
 	Repository repository.SCM
 }
 
@@ -113,12 +120,6 @@ func (r *Mode) AddOptions(options *command.Options) (err error) {
 		}
 	} else {
 		options.Add("--input", AppDir)
-	}
-	if r.Diva {
-		options.Add("--enableTransactionAnalysis")
-	}
-	if r.CSV {
-		options.Add("--exportCSV")
 	}
 
 	return
