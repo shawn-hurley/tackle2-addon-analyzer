@@ -1,15 +1,14 @@
 package main
 
 import (
-	"os"
-	"path"
-	"strings"
-	"time"
-
+	"github.com/konveyor/analyzer-lsp/hubapi"
 	"github.com/konveyor/tackle2-addon/repository"
 	"github.com/konveyor/tackle2-addon/ssh"
 	hub "github.com/konveyor/tackle2-hub/addon"
 	"github.com/konveyor/tackle2-hub/nas"
+	"os"
+	"path"
+	"strings"
 )
 
 var (
@@ -91,37 +90,12 @@ func main() {
 			return
 		}
 		//
-		// Delete report.
-		mark := time.Now()
-		bucket := addon.Application.Bucket(application.ID)
-		err = bucket.Delete(d.Output)
-		if err != nil {
-			return
-		}
-		addon.Activity(
-			"[BUCKET] Report deleted:%s duration:%v.",
-			d.Output,
-			time.Since(mark))
-		//
-		// Maven.
-		maven := repository.Maven{
-			M2Dir:  M2Dir,
-			BinDir: DepDir,
-			Remote: repository.Remote{
-				Repository: application.Repository,
-				Identities: application.Identities,
-			},
-		}
-		//
 		// SSH
 		agent := ssh.Agent{}
 		err = agent.Start()
 		if err != nil {
 			return
 		}
-		//
-		// The application has modules.
-		var hasModules bool
 		//
 		// Fetch repository.
 		if !d.Mode.Binary {
@@ -152,29 +126,6 @@ func main() {
 			} else {
 				return
 			}
-			if d.Mode.WithDeps {
-				hasModules, err = maven.HasModules(AppDir)
-				if err != nil {
-					return
-				}
-				if hasModules {
-					err = maven.InstallArtifacts(AppDir)
-					if err != nil {
-						return
-					}
-				}
-				err = maven.Fetch(AppDir)
-				if err != nil {
-					return
-				}
-			}
-		} else {
-			if d.Mode.Artifact == "" {
-				err = maven.FetchArtifact(application.Binary)
-				if err != nil {
-					return
-				}
-			}
 		}
 		//
 		// Run analyzer.
@@ -185,29 +136,10 @@ func main() {
 			return
 		}
 		//
-		// Update report.
-		mark = time.Now()
-		bucket = addon.Application.Bucket(application.ID)
-		err = bucket.Put(ReportDir, d.Output)
-		if err != nil {
-			return
-		}
-		addon.Activity(
-			"[BUCKET] Report updated:%s duration:%v.",
-			d.Output,
-			time.Since(mark))
-		//
-		// Clean up.
-		if hasModules {
-			err = maven.DeleteArtifacts(SourceDir)
-			if err != nil {
-				return
-			}
-		}
-		//
 		// Tagging.
 		if d.Tagger.Enabled {
-			err = d.Tagger.Update(application.ID, "<path needed>")
+			report := &hubapi.RuleSet{}
+			err = d.Tagger.Update(application.ID, report)
 			if err != nil {
 				return
 			}
