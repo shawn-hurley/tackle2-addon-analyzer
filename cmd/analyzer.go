@@ -31,7 +31,7 @@ type Analyzer struct {
 //
 // Run analyzer.
 func (r *Analyzer) Run() (err error) {
-	cmd := command.Command{Path: "/usr/bin/konveyor-analyzer"}
+	cmd := command.Command{Path: "/usr/bin/local/konveyor-analyzer"}
 	cmd.Options, err = r.options()
 	if err != nil {
 		return

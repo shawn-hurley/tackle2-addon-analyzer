@@ -1,0 +1,19 @@
+[
+    {
+        "name": "go",
+        "location": "examples/golang",
+        "binaryLocation": "/usr/local/bin/gopls"
+    },
+    {
+        "name": "java",
+        "location": "examples/java",
+        "binaryLocation": "/opt/jdtls/bin/jdtls",
+        "providerSpecificConfig": {
+            "bundles": "/opt/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar"
+        }
+    },
+    {
+        "name": "builtin",
+        "location": "examples/java"
+    }
+]
