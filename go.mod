@@ -4,8 +4,8 @@ go 1.18
 
 require (
 	github.com/konveyor/analyzer-lsp v0.0.0-20230428140708-e32a4f09dc2d
-	github.com/konveyor/tackle2-addon v0.0.0-20230329181503-cc8ac05b87a1
-	github.com/konveyor/tackle2-hub v0.0.0-20230328195711-114d242834e3
+	github.com/konveyor/tackle2-addon v0.1.2-0.20230417130049-a4904a9273d2
+	github.com/konveyor/tackle2-hub v0.1.2-0.20230509193536-e956fefeb39c
 )
 
 require (
@@ -42,7 +42,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
-	github.com/konveyor/controller v0.8.0 // indirect
 	github.com/leodido/go-urn v1.2.3 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
@@ -87,6 +86,4 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace github.com/konveyor/tackle2-hub => github.com/jortel/tackle2-hub v0.0.0-20230501204523-c5f1057d13a2
-
-replace github.com/konveyor/tackle2-addon => github.com/jortel/tackle2-addon v0.0.0-20230501204915-cd2f84ce798f
+replace github.com/konveyor/tackle2-addon => github.com/jortel/tackle2-addon v0.0.0-20230509205729-b368f531c09d
