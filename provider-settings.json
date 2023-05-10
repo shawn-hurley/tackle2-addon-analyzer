@@ -9,7 +9,7 @@
         "location": "examples/java",
         "binaryLocation": "/opt/jdtls/bin/jdtls",
         "providerSpecificConfig": {
-            "bundles": "/opt/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar"
+            "bundles": "/opt/java-analyzer-bundle.jar"
         }
     },
     {

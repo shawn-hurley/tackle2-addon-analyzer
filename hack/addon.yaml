@@ -2,6 +2,6 @@
 kind: Addon
 apiVersion: tackle.konveyor.io/v1alpha1
 metadata:
-  name: windup
+  name: analyzer
 spec:
-  image: quay.io/jortel/tackle-addon-windup
+  image: quay.io/jortel/tackle2-addon-analyzer

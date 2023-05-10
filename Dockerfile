@@ -1,40 +1,24 @@
-FROM registry.access.redhat.com/ubi9/ubi-minimal
+FROM registry.access.redhat.com/ubi9/openjdk-17 as base
 USER root
 WORKDIR /tmp
-RUN microdnf -y update && microdnf -y clean all
-RUN echo -e "[centos9]" \
- "\nname = centos9" \
- "\nbaseurl = http://mirror.stream.centos.org/9-stream/AppStream/\$basearch/os/" \
- "\nenabled = 1" \
- "\ngpgcheck = 0" > /etc/yum.repos.d/centos.repo
 RUN microdnf -y install \
- java-17-openjdk-headless \
- openssh-clients \
  tar \
  wget \
- git \
- subversion \
- maven \
-&& microdnf -y clean all
-ENV HOME=/working \
- JAVA_HOME="/usr/lib/jvm/jre-17" \
- JAVA_VENDOR="openjdk" \
- JAVA_VERSION="17"
+ git
 #
 # Build jdtls.
 #
-ARG JDTLS=https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.6.0/jdt-language-server-1.6.0-202111261512.tar.gz
-RUN wget -qO jdtls.tar.gz $JDTLS \
- && tar xvf jdtls.tar.gz -C /opt \
- && rm jdtls.tar.gz
+ARG JDTLS=https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.16.0/jdt-language-server-1.16.0-202209291445.tar.gz
+RUN wget -qO jdtls.tar.gz $JDTLS
+RUN tar xvf jdtls.tar.gz -C /opt
 #
 # Build java provider bundle.
 #
-RUN mkdir -p m2 \
- && git clone https://github.com/konveyor/java-analyzer-bundle --depth 1 \
- && mvn clean install -Dmaven.repo.local=m2 -DskipTests=true -f java-analyzer-bundle/pom.xml \
- && cp m2/io/konveyor/tackle/java-analyzer-bundle.core/1.0.0-SNAPSHOT/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar \
- /opt
+RUN mkdir -p m2
+RUN git clone https://github.com/konveyor/java-analyzer-bundle --depth 1
+RUN mvn clean install -Dmaven.repo.local=m2 -DskipTests=true -f java-analyzer-bundle/pom.xml
+RUN cp m2/io/konveyor/tackle/java-analyzer-bundle.core/1.0.0-SNAPSHOT/java-analyzer-bundle.core-1.0.0-SNAPSHOT.jar \
+ /opt/java-analyzer-bundle.jar
 #
 # Build analyzer and install gopls.
 #
@@ -54,11 +38,27 @@ RUN make cmd
 #
 # Build container.
 #
-FROM registry.access.redhat.com/ubi9/ubi-minimal
+FROM registry.access.redhat.com/ubi9/openjdk-17
+USER root
+RUN echo -e "[centos9]" \
+ "\nname = centos9" \
+ "\nbaseurl = http://mirror.stream.centos.org/9-stream/AppStream/\$basearch/os/" \
+ "\nenabled = 1" \
+ "\ngpgcheck = 0" > /etc/yum.repos.d/centos.repo
+RUN microdnf -y install \
+ openssh-clients \
+ subversion \
+ git \
+ tar
+ENV HOME=/working \
+ JAVA_HOME="/usr/lib/jvm/jre-17" \
+ JAVA_VENDOR="openjdk" \
+ JAVA_VERSION="17"
 WORKDIR /working
 ARG GOPATH=/opt/app-root
+COPY --from=base /opt /opt
+COPY --from=addon $GOPATH/src/provider-settings.json ./
 COPY --from=addon $GOPATH/src/bin/addon /usr/local/bin
-COPY --from=addon $GOPATH/src/provider-settings.json /working
 COPY --from=analyzer $GOPATH/src/konveyor-analyzer /usr/local/bin
 COPY --from=analyzer $GOPATH/src/konveyor-analyzer-dep /usr/local/bin
 COPY --from=analyzer $GOPATH/bin/gopls /usr/local/bin

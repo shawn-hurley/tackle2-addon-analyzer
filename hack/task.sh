@@ -4,10 +4,8 @@ host="${HOST:-localhost:8080}"
 
 curl -X POST ${host}/tasks -d \
 '{
-    "name":"Windup",
     "state": "Ready",
-    "locator": "windup",
-    "addon": "windup",
+    "addon": "analyzer",
     "application": {"id": 1},
     "data": {
         "mode": {
