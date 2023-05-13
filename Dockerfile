@@ -50,16 +50,17 @@ RUN microdnf -y install \
  subversion \
  git \
  tar
-ENV HOME=/working \
+ENV HOME=/addon \
+ ADDON=/addon \
  JAVA_HOME="/usr/lib/jvm/jre-17" \
  JAVA_VENDOR="openjdk" \
  JAVA_VERSION="17"
-WORKDIR /working
+WORKDIR /addon
 ARG GOPATH=/opt/app-root
-COPY --from=base /opt /opt
-COPY --from=addon $GOPATH/src/provider-settings.json ./
-COPY --from=addon $GOPATH/src/bin/addon /usr/local/bin
-COPY --from=analyzer $GOPATH/src/konveyor-analyzer /usr/local/bin
-COPY --from=analyzer $GOPATH/src/konveyor-analyzer-dep /usr/local/bin
-COPY --from=analyzer $GOPATH/bin/gopls /usr/local/bin
-ENTRYPOINT ["/usr/local/bin/addon"]
+COPY --from=base /opt ./opt
+COPY --from=addon $GOPATH/src/bin/addon /usr/bin
+COPY --from=addon $GOPATH/src/settings.json ./opt
+COPY --from=analyzer $GOPATH/src/konveyor-analyzer ./opt
+COPY --from=analyzer $GOPATH/src/konveyor-analyzer-dep ./opt
+COPY --from=analyzer $GOPATH/bin/gopls ./opt
+ENTRYPOINT ["/usr/bin/addon"]

@@ -1,0 +1,19 @@
+[
+    {
+        "name": "go",
+        "location": "",
+        "binaryLocation": "/addon/opt/gopls"
+    },
+    {
+        "name": "java",
+        "location": "",
+        "binaryLocation": "/addon/opt/jdtls/bin/jdtls",
+        "providerSpecificConfig": {
+            "bundles": "/addon/opt/java-analyzer-bundle.jar"
+        }
+    },
+    {
+        "name": "builtin",
+        "location": ""
+    }
+]

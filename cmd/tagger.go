@@ -24,7 +24,7 @@ func (r *Tagger) AddOptions(options *command.Options) (err error) {
 //   - Ensures categories exist.
 //   - Endures tags exist.
 //   - Replaces associated tags (by source).
-func (r *Tagger) Update(appID uint, report *Report) (err error) {
+func (r *Tagger) Update(appID uint, report Report) (err error) {
 	addon.Activity("[TAG] Tagging Application %d.", appID)
 	catMap, err := r.ensureCategories(report)
 	if err != nil {
@@ -44,13 +44,15 @@ func (r *Tagger) Update(appID uint, report *Report) (err error) {
 //
 // ensureCategories ensures categories exist.
 // Returns the map of category names to IDs.
-func (r *Tagger) ensureCategories(report *Report) (mp map[string]uint, err error) {
+func (r *Tagger) ensureCategories(report Report) (mp map[string]uint, err error) {
 	mp = map[string]uint{}
 	wanted := []api.TagCategory{}
-	for _, s := range report.Tags {
-		colon := strings.Index(s, ":")
-		if colon > 0 {
-			mp[s[:colon]] = 0
+	for _, ruleSet := range report {
+		for _, s := range ruleSet.Tags {
+			colon := strings.Index(s, ":")
+			if colon > 0 {
+				mp[s[:colon]] = 0
+			}
 		}
 	}
 	for name := range mp {
@@ -74,17 +76,19 @@ func (r *Tagger) ensureCategories(report *Report) (mp map[string]uint, err error
 //
 // ensureTags ensures tags exist.
 // Returns the wanted tag IDs.
-func (r *Tagger) ensureTags(catMap map[string]uint, report *Report) (tags []uint, err error) {
+func (r *Tagger) ensureTags(catMap map[string]uint, report Report) (tags []uint, err error) {
 	mp := map[TagRef]int{}
 	wanted := []api.Tag{}
-	for _, s := range report.Tags {
-		colon := strings.Index(s, ":")
-		if colon > 0 {
-			ref := TagRef{
-				Category: s[:colon],
-				Name:     s[colon:],
+	for _, ruleSet := range report {
+		for _, s := range ruleSet.Tags {
+			colon := strings.Index(s, ":")
+			if colon > 0 {
+				ref := TagRef{
+					Category: s[:colon],
+					Name:     s[colon:],
+				}
+				mp[ref] = 0
 			}
-			mp[ref] = 0
 		}
 	}
 	for ref := range mp {

@@ -1,37 +1,35 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/konveyor/analyzer-lsp/hubapi"
-	"github.com/konveyor/analyzer-lsp/provider/lib"
 	"github.com/konveyor/tackle2-addon/command"
 	"github.com/konveyor/tackle2-addon/repository"
 	"github.com/konveyor/tackle2-hub/api"
 	"github.com/konveyor/tackle2-hub/nas"
+	"gopkg.in/yaml.v3"
+	"io"
+	"os"
 	pathlib "path"
 	"strconv"
 	"strings"
 )
 
 //
-// ProviderSettings LSP provider settings.
-type ProviderSettings = lib.Config
-
-//
-// Report Analysis report.
-type Report = hubapi.RuleSet
-
-//
 // Analyzer application analyzer.
 type Analyzer struct {
 	application *api.Application
-	settings    ProviderSettings
 	*Data
 }
 
 //
 // Run analyzer.
 func (r *Analyzer) Run() (err error) {
-	cmd := command.Command{Path: "/usr/bin/local/konveyor-analyzer"}
+	path := pathlib.Join(
+		Dir,
+		"opt",
+		"konveyor-analyzer")
+	cmd := command.Command{Path: path}
 	cmd.Options, err = r.options()
 	if err != nil {
 		return
@@ -41,21 +39,24 @@ func (r *Analyzer) Run() (err error) {
 }
 
 //
-// options builds CLL options.
+// options builds Analyzer options.
 func (r *Analyzer) options() (options command.Options, err error) {
-	options = command.Options{
-		"--output",
-		ReportDir,
-	}
-	err = r.maven(&options)
+	settings := &Settings{}
+	err = settings.Read(SettingsPath)
 	if err != nil {
 		return
+	}
+	options = command.Options{
+		"--provider-settings",
+		SettingsPath,
+		"--output-file",
+		ReportPath,
 	}
 	err = r.Tagger.AddOptions(&options)
 	if err != nil {
 		return
 	}
-	err = r.Mode.AddOptions(&options)
+	err = r.Mode.AddOptions(settings)
 	if err != nil {
 		return
 	}
@@ -64,18 +65,9 @@ func (r *Analyzer) options() (options command.Options, err error) {
 		if err != nil {
 			return
 		}
-		r.Targets = append(
-			r.Targets,
-			r.Rules.foundTargets...)
 	}
-	if r.Sources != nil {
-		err = r.Sources.AddOptions(&options)
-		if err != nil {
-			return
-		}
-	}
-	if r.Targets != nil {
-		err = r.Targets.AddOptions(&options)
+	if r.Labels != nil {
+		err = r.Labels.AddOptions(&options)
 		if err != nil {
 			return
 		}
@@ -84,15 +76,9 @@ func (r *Analyzer) options() (options command.Options, err error) {
 	if err != nil {
 		return
 	}
-	return
-}
-
-//
-// maven add --input for maven artifacts.
-func (r *Analyzer) maven(options *command.Options) (err error) {
-	found, err := nas.HasDir(DepDir)
-	if found {
-		options.Add("--input", DepDir)
+	err = settings.Write(SettingsPath)
+	if err != nil {
+		return
 	}
 	return
 }
@@ -108,7 +94,7 @@ type Mode struct {
 
 //
 // AddOptions adds analyzer options.
-func (r *Mode) AddOptions(options *command.Options) (err error) {
+func (r *Mode) AddOptions(settings *Settings) (err error) {
 	if r.Binary {
 		if r.Artifact != "" {
 			bucket := addon.Bucket()
@@ -116,37 +102,24 @@ func (r *Mode) AddOptions(options *command.Options) (err error) {
 			if err != nil {
 				return
 			}
-			options.Add("--input", BinDir)
+			// TODO: options.Add("--input", BinDir)
 		}
 	} else {
-		options.Add("--input", AppDir)
+		settings.Location(AppDir)
 	}
 
 	return
 }
 
 //
-// Sources list of sources.
-type Sources []string
+// Labels list of sources.
+type Labels []string
 
 //
 // AddOptions add options.
-func (r Sources) AddOptions(options *command.Options) (err error) {
+func (r Labels) AddOptions(options *command.Options) (err error) {
 	for _, source := range r {
 		options.Add("--source", source)
-	}
-	return
-}
-
-//
-// Targets list of target.
-type Targets []string
-
-//
-// AddOptions add options.
-func (r Targets) AddOptions(options *command.Options) (err error) {
-	for _, target := range r {
-		options.Add("--target", target)
 	}
 	return
 }
@@ -187,7 +160,6 @@ type Rules struct {
 		Included []string `json:"included,omitempty"`
 		Excluded []string `json:"excluded,omitempty"`
 	} `json:"tags"`
-	foundTargets []string
 }
 
 //
@@ -225,9 +197,7 @@ func (r *Rules) addFiles(options *command.Options) (err error) {
 	if err != nil {
 		return
 	}
-	options.Add(
-		"--userRulesDirectory",
-		ruleDir)
+	options.Add("--rules", ruleDir)
 	bucket := addon.Bucket()
 	err = bucket.Get(r.Path, ruleDir)
 	if err != nil {
@@ -289,9 +259,7 @@ func (r *Rules) addRuleSets(options *command.Options, bundle *api.RuleBundle) (e
 		files++
 	}
 	if files > 0 {
-		options.Add(
-			"--userRulesDirectory",
-			ruleDir)
+		options.Add("--rules", ruleDir)
 	}
 	return
 }
@@ -327,9 +295,7 @@ func (r *Rules) addBundleRepository(options *command.Options, bundle *api.RuleBu
 		return
 	}
 	ruleDir := pathlib.Join(rootDir, bundle.Repository.Path)
-	options.Add(
-		"--userRulesDirectory",
-		ruleDir)
+	options.Add("--rules", ruleDir)
 	return
 }
 
@@ -362,8 +328,78 @@ func (r *Rules) addRepository(options *command.Options) (err error) {
 		return
 	}
 	ruleDir := pathlib.Join(rootDir, r.Repository.Path)
-	options.Add(
-		"--userRulesDirectory",
-		ruleDir)
+	options.Add("--rules", ruleDir)
+	return
+}
+
+//
+// Settings - provider settings file.
+// type Settings []lib.Config TODO: This cannot be used without json tags.
+type Settings []struct {
+	Name                   string            `json:"name,omitempty"`
+	Location               string            `json:"location,omitempty"`
+	DependencyPath         string            `json:"dependencyPath,omitempty"`
+	BinaryLocation         string            `json:"binaryLocation,omitempty"`
+	ProviderSpecificConfig map[string]string `json:"providerSpecificConfig,omitempty"`
+}
+
+//
+// Read file.
+func (r *Settings) Read(path string) (err error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer func() {
+		_ = f.Close()
+	}()
+	b, err := io.ReadAll(f)
+	err = json.Unmarshal(b, r)
+	return
+}
+
+//
+// Write file.
+func (r *Settings) Write(path string) (err error) {
+	f, err := os.Create(path)
+	if err != nil {
+		return
+	}
+	defer func() {
+		_ = f.Close()
+	}()
+	b, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		return
+	}
+	_, err = f.Write(b)
+	return
+}
+
+//
+// Location update the location on each provider.
+func (r *Settings) Location(path string) {
+	for i := range *r {
+		p := &(*r)[i]
+		p.Location = path
+	}
+}
+
+//
+// Report analysis report file.
+type Report []hubapi.RuleSet
+
+//
+// Read file.
+func (r *Report) Read(path string) (err error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer func() {
+		_ = f.Close()
+	}()
+	b, err := io.ReadAll(f)
+	err = yaml.Unmarshal(b, &r)
 	return
 }

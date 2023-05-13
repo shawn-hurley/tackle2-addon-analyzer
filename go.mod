@@ -6,6 +6,7 @@ require (
 	github.com/konveyor/analyzer-lsp v0.0.0-20230428140708-e32a4f09dc2d
 	github.com/konveyor/tackle2-addon v0.1.2-0.20230417130049-a4904a9273d2
 	github.com/konveyor/tackle2-hub v0.1.2-0.20230509193536-e956fefeb39c
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -70,7 +71,6 @@ require (
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/datatypes v1.2.0 // indirect
 	gorm.io/driver/mysql v1.4.7 // indirect
 	gorm.io/gorm v1.25.0 // indirect

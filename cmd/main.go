@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/konveyor/analyzer-lsp/hubapi"
 	"github.com/konveyor/tackle2-addon/repository"
 	"github.com/konveyor/tackle2-addon/ssh"
 	hub "github.com/konveyor/tackle2-hub/addon"
@@ -12,27 +11,33 @@ import (
 )
 
 var (
-	addon     = hub.Addon
-	HomeDir   = ""
-	DepDir    = ""
-	BinDir    = ""
-	SourceDir = ""
-	AppDir    = ""
-	Dir       = ""
-	M2Dir     = ""
-	ReportDir = ""
-	RuleDir   = ""
+	addon        = hub.Addon
+	HomeDir      = ""
+	BinDir       = ""
+	SourceDir    = ""
+	AppDir       = ""
+	Dir          = ""
+	M2Dir        = ""
+	ReportPath   = ""
+	DepsPath     = ""
+	RuleDir      = ""
+	SettingsPath = ""
 )
 
 func init() {
 	Dir, _ = os.Getwd()
+	addonDir := os.Getenv("ADDON")
+	if addonDir != "" {
+		Dir = addonDir
+	}
 	HomeDir, _ = os.UserHomeDir()
 	SourceDir = path.Join(Dir, "source")
-	DepDir = path.Join(Dir, "deps")
 	BinDir = path.Join(Dir, "bin")
-	ReportDir = path.Join(Dir, "report")
+	ReportPath = path.Join(Dir, "report.yaml")
+	DepsPath = path.Join(Dir, "deps.yaml")
 	RuleDir = path.Join(Dir, "rules")
 	M2Dir = "/cache/m2"
+	SettingsPath = path.Join(Dir, "opt", "settings.json")
 }
 
 type SoftError = hub.SoftError
@@ -44,10 +49,8 @@ type Data struct {
 	Output string `json:"output" binding:"required"`
 	// Mode options.
 	Mode Mode `json:"mode"`
-	// Sources list.
-	Sources Sources `json:"sources"`
-	// Targets list.
-	Targets Targets `json:"targets"`
+	// Labels list.
+	Labels Labels `json:"labels"`
 	// Scope options.
 	Scope Scope `json:"scope"`
 	// Rules options.
@@ -70,7 +73,7 @@ func main() {
 		}
 		//
 		// Create directories.
-		for _, dir := range []string{BinDir, M2Dir, RuleDir, ReportDir} {
+		for _, dir := range []string{BinDir, M2Dir, RuleDir} {
 			err = nas.MkDir(dir, 0755)
 			if err != nil {
 				return
@@ -138,7 +141,11 @@ func main() {
 		//
 		// Tagging.
 		if d.Tagger.Enabled {
-			report := &hubapi.RuleSet{}
+			var report Report
+			err = report.Read(ReportPath)
+			if err != nil {
+				return
+			}
 			err = d.Tagger.Update(application.ID, report)
 			if err != nil {
 				return

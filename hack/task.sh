@@ -1,36 +1,20 @@
 #!/bin/bash
 
 host="${HOST:-localhost:8080}"
+state="${1:-Ready}"
 
-curl -X POST ${host}/tasks -d \
-'{
-    "state": "Ready",
-    "addon": "analyzer",
-    "application": {"id": 1},
-    "data": {
-        "mode": {
-            "artifact": "",
-            "binary": false,
-            "withDeps": false,
-	    "diva": true
-        },
-        "output": "/windup/report",
-        "rules": {
-            "path": "",
-            "tags": {
-                "excluded": [ ]
-            }
-        },
-        "scope": {
-            "packages": {
-                "excluded": [ ],
-                "included": [ ]
-            },
-            "withKnown": false
-        },
-        "sources": [ ],
-        "targets": [
-            "cloud-readiness"
-        ]
-    }
-}' | jq -M .
+curl -X POST ${host}/tasks \
+  -H 'Content-Type:application/x-yaml' \
+  -H 'Accept:application/x-yaml' \
+ -d \
+"
+---
+state: ${state}
+addon: analyzer
+application:
+  id: 4
+data:
+  rules:
+    bundles:
+    - id: 12
+"
