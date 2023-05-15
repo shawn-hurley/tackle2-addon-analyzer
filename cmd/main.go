@@ -104,6 +104,12 @@ func main() {
 		if err != nil {
 			return
 		}
+		depAnalyzer := DepAnalyzer{}
+		depAnalyzer.Data = d
+		err = depAnalyzer.Run()
+		if err != nil {
+			return
+		}
 		//
 		// Tagging.
 		if d.Tagger.Enabled {
@@ -116,14 +122,6 @@ func main() {
 			if err != nil {
 				return
 			}
-		}
-		//
-		// Find deps.
-		depAnalyzer := DepAnalyzer{}
-		depAnalyzer.Data = d
-		err = depAnalyzer.Run()
-		if err != nil {
-			return
 		}
 		return
 	})
