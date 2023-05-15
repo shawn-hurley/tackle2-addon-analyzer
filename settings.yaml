@@ -1,0 +1,8 @@
+---
+- name: go
+  binaryLocation: /addon/opt/gopls
+- name: java
+  binaryLocation: /addon/opt/jdtls/bin/jdtls
+  providerSpecificConfig:
+    bindles: /addon/opt/java-analyzer-bundle.jar
+- name: builtin

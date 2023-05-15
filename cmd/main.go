@@ -26,10 +26,6 @@ var (
 
 func init() {
 	Dir, _ = os.Getwd()
-	addonDir := os.Getenv("ADDON")
-	if addonDir != "" {
-		Dir = addonDir
-	}
 	HomeDir, _ = os.UserHomeDir()
 	SourceDir = path.Join(Dir, "source")
 	BinDir = path.Join(Dir, "bin")
@@ -37,7 +33,7 @@ func init() {
 	DepsPath = path.Join(Dir, "deps.yaml")
 	RuleDir = path.Join(Dir, "rules")
 	M2Dir = "/cache/m2"
-	SettingsPath = path.Join(Dir, "opt", "settings.json")
+	SettingsPath = path.Join(Dir, "opt", "settings.yaml")
 }
 
 type SoftError = hub.SoftError

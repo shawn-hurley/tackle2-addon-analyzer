@@ -1,8 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/konveyor/analyzer-lsp/hubapi"
+	"github.com/konveyor/analyzer-lsp/provider/lib"
 	"github.com/konveyor/tackle2-addon/command"
 	"github.com/konveyor/tackle2-addon/repository"
 	"github.com/konveyor/tackle2-hub/api"
@@ -13,6 +13,7 @@ import (
 	pathlib "path"
 	"strconv"
 	"strings"
+	"time"
 )
 
 //
@@ -35,6 +36,8 @@ func (r *Analyzer) Run() (err error) {
 		return
 	}
 	err = cmd.Run()
+	addon.Activity("SLEEP")
+	time.Sleep(time.Minute * 10)
 	return
 }
 
@@ -334,14 +337,7 @@ func (r *Rules) addRepository(options *command.Options) (err error) {
 
 //
 // Settings - provider settings file.
-// type Settings []lib.Config TODO: This cannot be used without json tags.
-type Settings []struct {
-	Name                   string            `json:"name,omitempty"`
-	Location               string            `json:"location,omitempty"`
-	DependencyPath         string            `json:"dependencyPath,omitempty"`
-	BinaryLocation         string            `json:"binaryLocation,omitempty"`
-	ProviderSpecificConfig map[string]string `json:"providerSpecificConfig,omitempty"`
-}
+type Settings []lib.Config
 
 //
 // Read file.
@@ -354,7 +350,7 @@ func (r *Settings) Read(path string) (err error) {
 		_ = f.Close()
 	}()
 	b, err := io.ReadAll(f)
-	err = json.Unmarshal(b, r)
+	err = yaml.Unmarshal(b, r)
 	return
 }
 
@@ -368,7 +364,7 @@ func (r *Settings) Write(path string) (err error) {
 	defer func() {
 		_ = f.Close()
 	}()
-	b, err := json.MarshalIndent(r, "", "  ")
+	b, err := yaml.Marshal(r)
 	if err != nil {
 		return
 	}

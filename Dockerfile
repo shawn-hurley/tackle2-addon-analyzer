@@ -59,7 +59,7 @@ WORKDIR /addon
 ARG GOPATH=/opt/app-root
 COPY --from=base /opt ./opt
 COPY --from=addon $GOPATH/src/bin/addon /usr/bin
-COPY --from=addon $GOPATH/src/settings.json ./opt
+COPY --from=addon $GOPATH/src/settings.yaml ./opt
 COPY --from=analyzer $GOPATH/src/konveyor-analyzer ./opt
 COPY --from=analyzer $GOPATH/src/konveyor-analyzer-dep ./opt
 COPY --from=analyzer $GOPATH/bin/gopls ./opt
