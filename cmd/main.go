@@ -1,13 +1,11 @@
 package main
 
 import (
-	"github.com/konveyor/tackle2-addon/repository"
 	"github.com/konveyor/tackle2-addon/ssh"
 	hub "github.com/konveyor/tackle2-hub/addon"
 	"github.com/konveyor/tackle2-hub/nas"
 	"os"
 	"path"
-	"strings"
 )
 
 var (
@@ -15,7 +13,6 @@ var (
 	HomeDir      = ""
 	BinDir       = ""
 	SourceDir    = ""
-	AppDir       = ""
 	Dir          = ""
 	M2Dir        = ""
 	ReportPath   = ""
@@ -76,16 +73,10 @@ func main() {
 			}
 		}
 		//
-		// analyzer
-		analyzer := Analyzer{}
-		analyzer.Data = d
-		//
 		// Fetch application.
 		addon.Activity("Fetching application.")
 		application, err := addon.Task.Application()
-		if err == nil {
-			analyzer.application = application
-		} else {
+		if err != nil {
 			return
 		}
 		//
@@ -96,42 +87,21 @@ func main() {
 			return
 		}
 		//
-		// Fetch repository.
-		if !d.Mode.Binary {
-			addon.Total(2)
-			if application.Repository == nil {
-				err = &SoftError{Reason: "Application repository not defined."}
-				return
-			}
-			SourceDir = path.Join(
-				SourceDir,
-				strings.Split(
-					path.Base(
-						application.Repository.URL),
-					".")[0])
-			AppDir = path.Join(SourceDir, application.Repository.Path)
-			var r repository.SCM
-			r, err = repository.New(
-				SourceDir,
-				application.Repository,
-				application.Identities)
-			if err != nil {
-				return
-			}
-			err = r.Fetch()
-			if err == nil {
-				addon.Increment()
-				analyzer.Mode.Repository = r
-			} else {
-				return
-			}
+		// Build assets.
+		err = d.Mode.Build(application)
+		if err != nil {
+			return
+		}
+		err = d.Rules.Build()
+		if err != nil {
+			return
 		}
 		//
-		// Run analyzer.
+		// Run analysis.
+		analyzer := Analyzer{}
+		analyzer.Data = d
 		err = analyzer.Run()
-		if err == nil {
-			addon.Increment()
-		} else {
+		if err != nil {
 			return
 		}
 		//
@@ -146,6 +116,14 @@ func main() {
 			if err != nil {
 				return
 			}
+		}
+		//
+		// Find deps.
+		depAnalyzer := DepAnalyzer{}
+		depAnalyzer.Data = d
+		err = depAnalyzer.Run()
+		if err != nil {
+			return
 		}
 		return
 	})
