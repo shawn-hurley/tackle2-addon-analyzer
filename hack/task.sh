@@ -12,7 +12,7 @@ curl -X POST ${host}/tasks \
 state: ${state}
 addon: analyzer
 application:
-  id: 4
+  id: 1
 data:
   rules:
     bundles:

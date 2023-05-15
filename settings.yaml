@@ -4,5 +4,5 @@
 - name: java
   binaryLocation: /addon/opt/jdtls/bin/jdtls
   providerSpecificConfig:
-    bindles: /addon/opt/java-analyzer-bundle.jar
+    bundles: /addon/opt/java-analyzer-bundle.jar
 - name: builtin

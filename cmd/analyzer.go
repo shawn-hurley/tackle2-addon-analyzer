@@ -13,7 +13,6 @@ import (
 	pathlib "path"
 	"strconv"
 	"strings"
-	"time"
 )
 
 //
@@ -36,8 +35,6 @@ func (r *Analyzer) Run() (err error) {
 		return
 	}
 	err = cmd.Run()
-	addon.Activity("SLEEP")
-	time.Sleep(time.Minute * 10)
 	return
 }
 
@@ -242,7 +239,6 @@ func (r *Rules) addRuleSets(options *command.Options, bundle *api.RuleBundle) (e
 	if err != nil {
 		return
 	}
-	files := 0
 	for _, ruleset := range bundle.RuleSets {
 		fileRef := ruleset.File
 		if fileRef == nil {
@@ -259,10 +255,7 @@ func (r *Rules) addRuleSets(options *command.Options, bundle *api.RuleBundle) (e
 		if err != nil {
 			break
 		}
-		files++
-	}
-	if files > 0 {
-		options.Add("--rules", ruleDir)
+		options.Add("--rules", path)
 	}
 	return
 }

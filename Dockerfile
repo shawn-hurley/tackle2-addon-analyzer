@@ -10,7 +10,8 @@ RUN microdnf -y install \
 #
 ARG JDTLS=https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.16.0/jdt-language-server-1.16.0-202209291445.tar.gz
 RUN wget -qO jdtls.tar.gz $JDTLS
-RUN tar xvf jdtls.tar.gz -C /opt
+RUN mkdir /opt/jdtls
+RUN tar xvf jdtls.tar.gz -C /opt/jdtls
 #
 # Build java provider bundle.
 #

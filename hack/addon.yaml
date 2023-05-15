@@ -5,3 +5,4 @@ metadata:
   name: analyzer
 spec:
   image: quay.io/jortel/tackle2-addon-analyzer
+  imagePullPolicy: Always
