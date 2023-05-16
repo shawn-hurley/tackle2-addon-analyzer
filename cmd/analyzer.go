@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/konveyor/analyzer-lsp/dependency/dependency"
 	"github.com/konveyor/analyzer-lsp/hubapi"
 	"github.com/konveyor/tackle2-addon/command"
 	"gopkg.in/yaml.v3"
@@ -17,23 +18,28 @@ type Analyzer struct {
 
 //
 // Run analyzer.
-func (r *Analyzer) Run() (err error) {
-	path := path.Join(
+func (r *Analyzer) Run() (report Report, err error) {
+	bin := path.Join(
 		Dir,
 		"opt",
 		"konveyor-analyzer")
-	cmd := command.Command{Path: path}
-	cmd.Options, err = r.options()
+	output := path.Join(Dir, "report.yaml")
+	cmd := command.Command{Path: bin}
+	cmd.Options, err = r.options(output)
 	if err != nil {
 		return
 	}
 	err = cmd.Run()
+	if err != nil {
+		return
+	}
+	err = report.Read(output)
 	return
 }
 
 //
 // options builds Analyzer options.
-func (r *Analyzer) options() (options command.Options, err error) {
+func (r *Analyzer) options(output string) (options command.Options, err error) {
 	settings := &Settings{}
 	err = settings.Read(SettingsPath)
 	if err != nil {
@@ -43,7 +49,7 @@ func (r *Analyzer) options() (options command.Options, err error) {
 		"--provider-settings",
 		SettingsPath,
 		"--output-file",
-		ReportPath,
+		output,
 	}
 	err = r.Tagger.AddOptions(&options)
 	if err != nil {
@@ -84,23 +90,28 @@ type DepAnalyzer struct {
 
 //
 // Run analyzer.
-func (r *DepAnalyzer) Run() (err error) {
-	path := path.Join(
+func (r *DepAnalyzer) Run() (deps Deps, err error) {
+	bin := path.Join(
 		Dir,
 		"opt",
 		"konveyor-analyzer-dep")
-	cmd := command.Command{Path: path}
-	cmd.Options, err = r.options()
+	output := path.Join(Dir, "report.yaml")
+	cmd := command.Command{Path: bin}
+	cmd.Options, err = r.options(output)
 	if err != nil {
 		return
 	}
 	err = cmd.Run()
+	if err != nil {
+		return
+	}
+	err = deps.Read(output)
 	return
 }
 
 //
 // options builds Analyzer options.
-func (r *DepAnalyzer) options() (options command.Options, err error) {
+func (r *DepAnalyzer) options(output string) (options command.Options, err error) {
 	settings := &Settings{}
 	err = settings.Read(SettingsPath)
 	if err != nil {
@@ -110,7 +121,7 @@ func (r *DepAnalyzer) options() (options command.Options, err error) {
 		"--provider-settings",
 		SettingsPath,
 		"--output-file",
-		DepsPath,
+		output,
 	}
 	err = r.Mode.AddOptions(settings)
 	if err != nil {
@@ -130,6 +141,25 @@ type Report []hubapi.RuleSet
 //
 // Read file.
 func (r *Report) Read(path string) (err error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer func() {
+		_ = f.Close()
+	}()
+	b, err := io.ReadAll(f)
+	err = yaml.Unmarshal(b, &r)
+	return
+}
+
+//
+// Deps analysis report file.
+type Deps []dependency.Dep
+
+//
+// Read file.
+func (r *Deps) Read(path string) (err error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return

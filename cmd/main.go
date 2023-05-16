@@ -10,24 +10,18 @@ import (
 
 var (
 	addon        = hub.Addon
-	HomeDir      = ""
 	BinDir       = ""
 	SourceDir    = ""
 	Dir          = ""
 	M2Dir        = ""
-	ReportPath   = ""
-	DepsPath     = ""
 	RuleDir      = ""
 	SettingsPath = ""
 )
 
 func init() {
 	Dir, _ = os.Getwd()
-	HomeDir, _ = os.UserHomeDir()
 	SourceDir = path.Join(Dir, "source")
 	BinDir = path.Join(Dir, "bin")
-	ReportPath = path.Join(Dir, "report.yaml")
-	DepsPath = path.Join(Dir, "deps.yaml")
 	RuleDir = path.Join(Dir, "rules")
 	M2Dir = "/cache/m2"
 	SettingsPath = path.Join(Dir, "opt", "settings.yaml")
@@ -100,24 +94,19 @@ func main() {
 		// Run analysis.
 		analyzer := Analyzer{}
 		analyzer.Data = d
-		err = analyzer.Run()
+		report, err := analyzer.Run()
 		if err != nil {
 			return
 		}
 		depAnalyzer := DepAnalyzer{}
 		depAnalyzer.Data = d
-		err = depAnalyzer.Run()
+		_, err = depAnalyzer.Run()
 		if err != nil {
 			return
 		}
 		//
 		// Tagging.
 		if d.Tagger.Enabled {
-			var report Report
-			err = report.Read(ReportPath)
-			if err != nil {
-				return
-			}
 			err = d.Tagger.Update(application.ID, report)
 			if err != nil {
 				return
