@@ -6,6 +6,7 @@ require (
 	github.com/konveyor/analyzer-lsp v0.0.0-20230428140708-e32a4f09dc2d
 	github.com/konveyor/tackle2-addon v0.1.2-0.20230417130049-a4904a9273d2
 	github.com/konveyor/tackle2-hub v0.1.2-0.20230509193536-e956fefeb39c
+	go.lsp.dev/uri v0.3.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -58,7 +59,6 @@ require (
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
-	go.lsp.dev/uri v0.3.0 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/crypto v0.7.0 // indirect
 	golang.org/x/net v0.8.0 // indirect
@@ -88,4 +88,4 @@ require (
 
 replace github.com/konveyor/tackle2-addon => github.com/jortel/tackle2-addon v0.0.0-20230509205729-b368f531c09d
 
-replace github.com/konveyor/tackle2-hub => github.com/jortel/tackle2-hub v0.0.0-20230516202520-5e2844a41fe9
+replace github.com/konveyor/tackle2-hub => github.com/jortel/tackle2-hub v0.0.0-20230517120720-0743230a2bf9

@@ -192,8 +192,10 @@ func (r *Report) Analysis() (a *api.Analysis) {
 			issue.Incidents = []api.AnalysisIncident{}
 			for _, i := range v.Incidents {
 				incident := api.AnalysisIncident{
-					URI:     uriStr(i.URI),
-					Message: i.Message,
+					URI:      uriStr(i.URI),
+					Message:  i.Message,
+					CodeSnip: i.CodeSnip,
+					Facts:    i.Variables,
 				}
 				issue.Incidents = append(
 					issue.Incidents,
