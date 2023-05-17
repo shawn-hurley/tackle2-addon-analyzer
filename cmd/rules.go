@@ -13,10 +13,11 @@ import (
 //
 // Rules settings.
 type Rules struct {
-	Path       string          `json:"path" binding:"required"`
+	Path       string          `json:"path"`
 	Bundles    []api.Ref       `json:"bundles"`
 	Repository *api.Repository `json:"repository"`
 	Identity   *api.Ref        `json:"identity"`
+	Labels     Labels          `json:"labels"`
 	Tags       struct {
 		Included []string `json:"included,omitempty"`
 		Excluded []string `json:"excluded,omitempty"`

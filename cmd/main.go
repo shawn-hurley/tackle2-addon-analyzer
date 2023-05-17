@@ -33,12 +33,8 @@ type SoftError = hub.SoftError
 //
 // Data Addon data passed in the secret.
 type Data struct {
-	// Output directory within application bucket.
-	Output string `json:"output" binding:"required"`
 	// Mode options.
 	Mode Mode `json:"mode"`
-	// Labels list.
-	Labels Labels `json:"labels"`
 	// Scope options.
 	Scope Scope `json:"scope"`
 	// Rules options.

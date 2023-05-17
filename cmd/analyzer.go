@@ -68,12 +68,6 @@ func (r *Analyzer) options(output string) (options command.Options, err error) {
 			return
 		}
 	}
-	if r.Labels != nil {
-		err = r.Labels.AddOptions(&options)
-		if err != nil {
-			return
-		}
-	}
 	err = r.Scope.AddOptions(&options)
 	if err != nil {
 		return
