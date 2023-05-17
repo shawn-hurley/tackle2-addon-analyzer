@@ -4,8 +4,10 @@ import (
 	"github.com/konveyor/tackle2-addon/command"
 	"github.com/konveyor/tackle2-hub/api"
 	"math/rand"
-	"strings"
+	"regexp"
 )
+
+var TagExp = regexp.MustCompile("(.+)(=)(.+)")
 
 //
 // Tagger tags an application.
@@ -49,9 +51,9 @@ func (r *Tagger) ensureCategories(report Report) (mp map[string]uint, err error)
 	wanted := []api.TagCategory{}
 	for _, ruleSet := range report {
 		for _, s := range ruleSet.Tags {
-			eq := strings.Index(s, "=")
-			if eq > 0 {
-				mp[s[:eq]] = 0
+			m := TagExp.FindStringSubmatch(s)
+			if len(m) == 4 {
+				mp[m[1]] = 0
 			}
 		}
 	}
@@ -81,11 +83,11 @@ func (r *Tagger) ensureTags(catMap map[string]uint, report Report) (tags []uint,
 	wanted := []api.Tag{}
 	for _, ruleSet := range report {
 		for _, s := range ruleSet.Tags {
-			eq := strings.Index(s, "=")
-			if eq > 0 {
+			m := TagExp.FindStringSubmatch(s)
+			if len(m) == 4 {
 				ref := TagRef{
-					Category: s[:eq],
-					Name:     s[eq:],
+					Category: m[1],
+					Name:     m[3],
 				}
 				mp[ref] = 0
 			}
