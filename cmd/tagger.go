@@ -49,9 +49,9 @@ func (r *Tagger) ensureCategories(report Report) (mp map[string]uint, err error)
 	wanted := []api.TagCategory{}
 	for _, ruleSet := range report {
 		for _, s := range ruleSet.Tags {
-			colon := strings.Index(s, ":")
-			if colon > 0 {
-				mp[s[:colon]] = 0
+			eq := strings.Index(s, "=")
+			if eq > 0 {
+				mp[s[:eq]] = 0
 			}
 		}
 	}
@@ -81,11 +81,11 @@ func (r *Tagger) ensureTags(catMap map[string]uint, report Report) (tags []uint,
 	wanted := []api.Tag{}
 	for _, ruleSet := range report {
 		for _, s := range ruleSet.Tags {
-			colon := strings.Index(s, ":")
-			if colon > 0 {
+			eq := strings.Index(s, "=")
+			if eq > 0 {
 				ref := TagRef{
-					Category: s[:colon],
-					Name:     s[colon:],
+					Category: s[:eq],
+					Name:     s[eq:],
 				}
 				mp[ref] = 0
 			}
@@ -124,6 +124,6 @@ func (r *Tagger) ensureAssociated(appID uint, wanted []uint) (err error) {
 //
 // TagRef -
 type TagRef struct {
-	Name     string `json:"name"`
 	Category string `json:"category"`
+	Name     string `json:"name"`
 }
