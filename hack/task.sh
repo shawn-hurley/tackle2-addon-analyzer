@@ -14,6 +14,8 @@ addon: analyzer
 application:
   id: 1
 data:
+  tagger:
+    enabled: "true"
   rules:
     bundles:
     - id: 12

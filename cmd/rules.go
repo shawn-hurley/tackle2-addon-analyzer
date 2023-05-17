@@ -110,6 +110,7 @@ func (r *Rules) addRuleSets(bundle *api.RuleBundle) (err error) {
 	if err != nil {
 		return
 	}
+	n := len(bundle.RuleSets)
 	for _, ruleset := range bundle.RuleSets {
 		fileRef := ruleset.File
 		if fileRef == nil {
@@ -126,6 +127,11 @@ func (r *Rules) addRuleSets(bundle *api.RuleBundle) (err error) {
 		if err != nil {
 			break
 		}
+		if n == 1 {
+			r.rules = append(r.rules, path)
+		}
+	}
+	if n > 1 {
 		r.rules = append(r.rules, ruleDir)
 	}
 	return

@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/konveyor/analyzer-lsp/dependency/dependency"
 	"github.com/konveyor/analyzer-lsp/hubapi"
 	"github.com/konveyor/tackle2-addon/command"
+	"github.com/konveyor/tackle2-hub/api"
+	"go.lsp.dev/uri"
 	"gopkg.in/yaml.v3"
 	"io"
 	"os"
@@ -90,12 +93,12 @@ type DepAnalyzer struct {
 
 //
 // Run analyzer.
-func (r *DepAnalyzer) Run() (deps Deps, err error) {
+func (r *DepAnalyzer) Run() (report DepReport, err error) {
 	bin := path.Join(
 		Dir,
 		"opt",
 		"konveyor-analyzer-dep")
-	output := path.Join(Dir, "report.yaml")
+	output := path.Join(Dir, "deps.yaml")
 	cmd := command.Command{Path: bin}
 	cmd.Options, err = r.options(output)
 	if err != nil {
@@ -105,7 +108,7 @@ func (r *DepAnalyzer) Run() (deps Deps, err error) {
 	if err != nil {
 		return
 	}
-	err = deps.Read(output)
+	err = report.Read(output)
 	return
 }
 
@@ -154,12 +157,81 @@ func (r *Report) Read(path string) (err error) {
 }
 
 //
-// Deps analysis report file.
-type Deps []dependency.Dep
+// Analysis builds api.Analysis.
+func (r *Report) Analysis() (a *api.Analysis) {
+	uriStr := func(in uri.URI) string {
+		defer func() {
+			recover()
+		}()
+		return in.Filename()
+	}
+	a = &api.Analysis{}
+	for _, ruleset := range *r {
+		for ruleid, v := range ruleset.Violations {
+			issue := api.AnalysisIssue{
+				RuleSet:     ruleset.Name,
+				Rule:        ruleid,
+				Description: v.Description,
+				Labels:      v.Labels,
+			}
+			if v.Category != nil {
+				issue.Category = string(*v.Category)
+			}
+			if v.Effort != nil {
+				issue.Effort = *v.Effort
+			}
+			issue.Links = []api.AnalysisLink{}
+			for _, l := range v.Links {
+				issue.Links = append(
+					issue.Links,
+					api.AnalysisLink{
+						URL:   l.URL,
+						Title: l.Title,
+					})
+			}
+			issue.Incidents = []api.AnalysisIncident{}
+			for _, i := range v.Incidents {
+				incident := api.AnalysisIncident{
+					URI:     uriStr(i.URI),
+					Message: i.Message,
+				}
+				issue.Incidents = append(
+					issue.Incidents,
+					incident)
+			}
+			a.Issues = append(a.Issues, issue)
+		}
+	}
+	return
+}
+
+//
+// Facts builds facts.
+func (r *Report) Facts() (facts []api.Fact) {
+	for _, r := range *r {
+		for _, v := range r.Violations {
+			mp := make(map[string]interface{})
+			_ = json.Unmarshal(v.Extras, &mp)
+			for k, v := range mp {
+				facts = append(
+					facts,
+					api.Fact{
+						Key:   k,
+						Value: v,
+					})
+			}
+		}
+	}
+	return
+}
+
+//
+// DepReport analysis report file.
+type DepReport []dependency.Dep
 
 //
 // Read file.
-func (r *Deps) Read(path string) (err error) {
+func (r *DepReport) Read(path string) (err error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return
@@ -170,4 +242,19 @@ func (r *Deps) Read(path string) (err error) {
 	b, err := io.ReadAll(f)
 	err = yaml.Unmarshal(b, &r)
 	return
+}
+
+//
+// Update updates deps in the api.Analysis.
+func (r *DepReport) Update(a *api.Analysis) {
+	for _, d := range *r {
+		a.Dependencies = append(
+			a.Dependencies,
+			api.AnalysisDependency{
+				Indirect: d.Indirect,
+				Name:     d.Name,
+				Version:  d.Version,
+				SHA:      d.SHA,
+			})
+	}
 }

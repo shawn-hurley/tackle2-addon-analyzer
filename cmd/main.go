@@ -16,6 +16,7 @@ var (
 	M2Dir        = ""
 	RuleDir      = ""
 	SettingsPath = ""
+	Source       = "Analysis"
 )
 
 func init() {
@@ -100,18 +101,34 @@ func main() {
 		}
 		depAnalyzer := DepAnalyzer{}
 		depAnalyzer.Data = d
-		_, err = depAnalyzer.Run()
+		depReport, err := depAnalyzer.Run()
+		if err != nil {
+			return
+		}
+		analysis := report.Analysis()
+		depReport.Update(analysis)
+		appAnalysis := addon.Application.Analysis(application.ID)
+		err = appAnalysis.Create(analysis)
 		if err != nil {
 			return
 		}
 		//
-		// Tagging.
+		// Tags.
 		if d.Tagger.Enabled {
 			err = d.Tagger.Update(application.ID, report)
 			if err != nil {
 				return
 			}
 		}
+		//
+		// Facts
+		facts := addon.Application.Facts(application.ID)
+		facts.Source(Source)
+		err = facts.Replace(report.Facts())
+		if err != nil {
+			return
+		}
+
 		return
 	})
 }
