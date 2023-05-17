@@ -7,33 +7,25 @@ Tackle (2nd generation) addon for Analyser.
 
 Task data.
 
-*=_optional_
-
 ```
-{
-  output: string,
-  mode: {
-    binary: bool,
-    withDeps: bool,
-    artifact: string,
-  },
-  sources: [str,],
-  targets: [str,],
-  scope: {
-    withKnown: bool,
-    packages: {
-      included: [str,],
-      excluded: [str,]
-    }
-  },
-  rules*: {
-    path: str, 
-    tags: {
-      included: [str,],
-      excluded: [str,]
-    }
-  }
-}
+---
+mode:
+  binary: bool
+  withDeps: bool
+  artifact: string
+tagger:
+  enabled: bool
+rules:
+  labels: [str,]
+  path: str,
+  repository:
+    kind: str
+    url: str
+    branch: str
+    path: str
+  tags:
+    included: bool
+    excluded: bool
 ```
 
 
