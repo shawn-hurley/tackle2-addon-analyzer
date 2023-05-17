@@ -23,6 +23,8 @@ rules:
     url: str
     branch: str
     path: str
+  bundles:
+    - id:
   tags:
     included: bool
     excluded: bool
