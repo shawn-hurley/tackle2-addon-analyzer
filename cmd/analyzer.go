@@ -162,7 +162,7 @@ func (r *Report) Analysis() (a *api.Analysis) {
 	a = &api.Analysis{}
 	for _, ruleset := range *r {
 		for ruleid, v := range ruleset.Violations {
-			issue := api.AnalysisIssue{
+			issue := api.Issue{
 				RuleSet:     ruleset.Name,
 				Rule:        ruleid,
 				Description: v.Description,
@@ -183,9 +183,9 @@ func (r *Report) Analysis() (a *api.Analysis) {
 						Title: l.Title,
 					})
 			}
-			issue.Incidents = []api.AnalysisIncident{}
+			issue.Incidents = []api.Incident{}
 			for _, i := range v.Incidents {
-				incident := api.AnalysisIncident{
+				incident := api.Incident{
 					URI:      uriStr(i.URI),
 					Message:  i.Message,
 					CodeSnip: i.CodeSnip,
@@ -246,7 +246,7 @@ func (r *DepReport) Update(a *api.Analysis) {
 	for _, d := range *r {
 		a.Dependencies = append(
 			a.Dependencies,
-			api.AnalysisDependency{
+			api.TechDependency{
 				Indirect: d.Indirect,
 				Name:     d.Name,
 				Version:  d.Version,

@@ -4,8 +4,8 @@ go 1.18
 
 require (
 	github.com/konveyor/analyzer-lsp v0.0.0-20230428140708-e32a4f09dc2d
-	github.com/konveyor/tackle2-addon v0.1.2-0.20230417130049-a4904a9273d2
-	github.com/konveyor/tackle2-hub v0.1.2-0.20230509193536-e956fefeb39c
+	github.com/konveyor/tackle2-addon v0.1.2-0.20230510185644-c600b133619a
+	github.com/konveyor/tackle2-hub v0.1.2-0.20230518195404-5e39c8efad05
 	go.lsp.dev/uri v0.3.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -85,7 +85,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
-
-replace github.com/konveyor/tackle2-addon => github.com/jortel/tackle2-addon v0.0.0-20230509205729-b368f531c09d
-
-replace github.com/konveyor/tackle2-hub => github.com/jortel/tackle2-hub v0.0.0-20230518170514-bde3f531f81d

@@ -17,6 +17,6 @@ data:
   tagger:
     enabled: "true"
   rules:
-    bundles:
+    rulesets:
     - id: 12
 "
