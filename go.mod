@@ -88,4 +88,4 @@ require (
 
 replace github.com/konveyor/tackle2-addon => github.com/jortel/tackle2-addon v0.0.0-20230509205729-b368f531c09d
 
-replace github.com/konveyor/tackle2-hub => github.com/jortel/tackle2-hub v0.0.0-20230517120720-0743230a2bf9
+replace github.com/konveyor/tackle2-hub => github.com/jortel/tackle2-hub v0.0.0-20230518170514-bde3f531f81d
