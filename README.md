@@ -23,7 +23,7 @@ rules:
     url: str
     branch: str
     path: str
-  bundles:
+  rulesets:
     - id:
   tags:
     included: bool

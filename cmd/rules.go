@@ -14,7 +14,7 @@ import (
 // Rules settings.
 type Rules struct {
 	Path       string          `json:"path"`
-	Bundles    []api.Ref       `json:"bundles"`
+	RuleSets   []api.Ref       `json:"rulesets"`
 	Repository *api.Repository `json:"repository"`
 	Identity   *api.Ref        `json:"identity"`
 	Labels     Labels          `json:"labels"`
@@ -36,7 +36,7 @@ func (r *Rules) Build() (err error) {
 	if err != nil {
 		return
 	}
-	err = r.addBundles()
+	err = r.addRuleSets()
 	if err != nil {
 		return
 	}
@@ -79,19 +79,19 @@ func (r *Rules) addFiles() (err error) {
 }
 
 //
-// AddBundles adds bundles.
-func (r *Rules) addBundles() (err error) {
-	for _, ref := range r.Bundles {
-		var bundle *api.RuleBundle
-		bundle, err = addon.RuleBundle.Get(ref.ID)
+// addRuleSets adds rulesets.
+func (r *Rules) addRuleSets() (err error) {
+	for _, ref := range r.RuleSets {
+		var ruleset *api.RuleSet
+		ruleset, err = addon.RuleSet.Get(ref.ID)
 		if err != nil {
 			return
 		}
-		err = r.addRuleSets(bundle)
+		err = r.addRules(ruleset)
 		if err != nil {
 			return
 		}
-		err = r.addBundleRepository(bundle)
+		err = r.addRuleSetRepository(ruleset)
 		if err != nil {
 			return
 		}
@@ -100,19 +100,19 @@ func (r *Rules) addBundles() (err error) {
 }
 
 //
-// addRuleSets adds ruleSets
-func (r *Rules) addRuleSets(bundle *api.RuleBundle) (err error) {
+// addRules adds rules
+func (r *Rules) addRules(ruleset *api.RuleSet) (err error) {
 	ruleDir := path.Join(
 		RuleDir,
-		"/bundles",
-		strconv.Itoa(int(bundle.ID)),
-		"rulesets")
+		"/rulesets",
+		strconv.Itoa(int(ruleset.ID)),
+		"rules")
 	err = nas.MkDir(ruleDir, 0755)
 	if err != nil {
 		return
 	}
-	n := len(bundle.RuleSets)
-	for _, ruleset := range bundle.RuleSets {
+	n := len(ruleset.Rules)
+	for _, ruleset := range ruleset.Rules {
 		fileRef := ruleset.File
 		if fileRef == nil {
 			continue
@@ -139,27 +139,27 @@ func (r *Rules) addRuleSets(bundle *api.RuleBundle) (err error) {
 }
 
 //
-// addBundleRepository adds bundle repository.
-func (r *Rules) addBundleRepository(bundle *api.RuleBundle) (err error) {
-	if bundle.Repository == nil {
+// addRuleSetRepository adds ruleset repository.
+func (r *Rules) addRuleSetRepository(ruleset *api.RuleSet) (err error) {
+	if ruleset.Repository == nil {
 		return
 	}
 	rootDir := path.Join(
 		RuleDir,
-		"/bundles",
-		strconv.Itoa(int(bundle.ID)),
+		"/rulesets",
+		strconv.Itoa(int(ruleset.ID)),
 		"repository")
 	err = nas.MkDir(rootDir, 0755)
 	if err != nil {
 		return
 	}
 	var ids []api.Ref
-	if bundle.Identity != nil {
-		ids = []api.Ref{*bundle.Identity}
+	if ruleset.Identity != nil {
+		ids = []api.Ref{*ruleset.Identity}
 	}
 	rp, err := repository.New(
 		rootDir,
-		bundle.Repository,
+		ruleset.Repository,
 		ids)
 	if err != nil {
 		return
@@ -168,7 +168,7 @@ func (r *Rules) addBundleRepository(bundle *api.RuleBundle) (err error) {
 	if err != nil {
 		return
 	}
-	ruleDir := path.Join(rootDir, bundle.Repository.Path)
+	ruleDir := path.Join(rootDir, ruleset.Repository.Path)
 	r.rules = append(r.rules, ruleDir)
 	return
 }
