@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/konveyor/analyzer-lsp v0.0.0-20230428140708-e32a4f09dc2d
 	github.com/konveyor/tackle2-addon v0.1.2-0.20230510185644-c600b133619a
-	github.com/konveyor/tackle2-hub main
+	github.com/konveyor/tackle2-hub v0.2.0-alpha.1.0.20230526175641-496faf4599ed
 	go.lsp.dev/uri v0.3.0
 	gopkg.in/yaml.v3 v3.0.1
 )
