@@ -151,15 +151,22 @@ func (r *Report) Read(path string) (err error) {
 }
 
 //
-// Analysis builds api.Analysis.
-func (r *Report) Analysis() (a *api.Analysis) {
+// Write issues file.
+func (r *Report) Write(path string) (err error) {
+	writer, err := os.Create(path)
+	if err != nil {
+		return
+	}
+	defer func() {
+		_ = writer.Close()
+	}()
 	uriStr := func(in uri.URI) string {
 		defer func() {
 			recover()
 		}()
 		return in.Filename()
 	}
-	a = &api.Analysis{}
+	encoder := json.NewEncoder(writer)
 	for _, ruleset := range *r {
 		for ruleid, v := range ruleset.Violations {
 			issue := api.Issue{
@@ -174,11 +181,11 @@ func (r *Report) Analysis() (a *api.Analysis) {
 			if v.Effort != nil {
 				issue.Effort = *v.Effort
 			}
-			issue.Links = []api.AnalysisLink{}
+			issue.Links = []api.Link{}
 			for _, l := range v.Links {
 				issue.Links = append(
 					issue.Links,
-					api.AnalysisLink{
+					api.Link{
 						URL:   l.URL,
 						Title: l.Title,
 					})
@@ -186,7 +193,7 @@ func (r *Report) Analysis() (a *api.Analysis) {
 			issue.Incidents = []api.Incident{}
 			for _, i := range v.Incidents {
 				incident := api.Incident{
-					URI:      uriStr(i.URI),
+					File:     uriStr(i.URI),
 					Message:  i.Message,
 					CodeSnip: i.CodeSnip,
 					Facts:    i.Variables,
@@ -195,7 +202,7 @@ func (r *Report) Analysis() (a *api.Analysis) {
 					issue.Incidents,
 					incident)
 			}
-			a.Issues = append(a.Issues, issue)
+			_ = encoder.Encode(&issue)
 		}
 	}
 	return
@@ -241,11 +248,20 @@ func (r *DepReport) Read(path string) (err error) {
 }
 
 //
-// Update updates deps in the api.Analysis.
-func (r *DepReport) Update(a *api.Analysis) {
+// Write deps file.
+func (r *DepReport) Write(path string) (err error) {
+	writer, err := os.Create(path)
+	if err != nil {
+		return
+	}
+	defer func() {
+		_ = writer.Close()
+	}()
+	encoder := json.NewEncoder(writer)
+	deps := []api.TechDependency{}
 	for _, d := range *r {
-		a.Dependencies = append(
-			a.Dependencies,
+		deps = append(
+			deps,
 			api.TechDependency{
 				Indirect: d.Indirect,
 				Name:     d.Name,
@@ -253,4 +269,6 @@ func (r *DepReport) Update(a *api.Analysis) {
 				SHA:      d.SHA,
 			})
 	}
+	_ = encoder.Encode(deps)
+	return
 }

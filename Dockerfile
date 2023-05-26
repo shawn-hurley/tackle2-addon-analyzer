@@ -24,7 +24,8 @@ RUN cp m2/io/konveyor/tackle/java-analyzer-bundle.core/1.0.0-SNAPSHOT/java-analy
 # Build analyzer and install gopls.
 #
 FROM registry.access.redhat.com/ubi9/go-toolset:latest as analyzer
-RUN git clone https://github.com/konveyor/analyzer-lsp --depth 1
+RUN git clone https://github.com/konveyor/analyzer-lsp
+RUN cd analyzer-lsp && git checkout bb51ff874660c94a2685240054e78b69f96a3165
 RUN mv analyzer-lsp/* .
 ENV GOPATH=$APP_ROOT
 RUN make build
