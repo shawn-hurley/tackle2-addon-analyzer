@@ -17,11 +17,10 @@ type Rules struct {
 	RuleSets   []api.Ref       `json:"rulesets"`
 	Repository *api.Repository `json:"repository"`
 	Identity   *api.Ref        `json:"identity"`
-	Labels     Labels          `json:"labels"`
-	Tags       struct {
+	Labels     struct {
 		Included []string `json:"included,omitempty"`
 		Excluded []string `json:"excluded,omitempty"`
-	} `json:"tags"`
+	} `json:"labels"`
 	rules []string
 }
 
@@ -48,12 +47,6 @@ func (r *Rules) Build() (err error) {
 func (r *Rules) AddOptions(options *command.Options) (err error) {
 	for _, path := range r.rules {
 		options.Add("--rules", path)
-	}
-	if len(r.Tags.Included) > 0 {
-		options.Add("--includeTags", r.Tags.Included...)
-	}
-	if len(r.Tags.Excluded) > 0 {
-		options.Add("--excludeTags", r.Tags.Excluded...)
 	}
 	return
 }

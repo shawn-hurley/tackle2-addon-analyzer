@@ -3,9 +3,11 @@ package main
 import (
 	"github.com/konveyor/tackle2-addon/ssh"
 	hub "github.com/konveyor/tackle2-hub/addon"
+	"github.com/konveyor/tackle2-hub/api"
 	"github.com/konveyor/tackle2-hub/nas"
 	"os"
 	"path"
+	"time"
 )
 
 var (
@@ -101,11 +103,41 @@ func main() {
 		if err != nil {
 			return
 		}
-		analysis := report.Analysis()
-		depReport.Update(analysis)
-		appAnalysis := addon.Application.Analysis(application.ID)
-		err = appAnalysis.Create(analysis)
+		//
+		// Post report.
+		p := path.Join(Dir, "issues.json")
+		err = report.Write(p)
 		if err != nil {
+			return
+		}
+		mark := time.Now()
+		issueFile, err := addon.File.Put(p)
+		if err == nil {
+			addon.Activity("[FILE] Uploaded: %s duration: %s", p, time.Since(mark))
+		} else {
+			return
+		}
+		p = path.Join(Dir, "deps.json")
+		err = depReport.Write(p)
+		if err != nil {
+			return
+		}
+		mark = time.Now()
+		depFile, err := addon.File.Put(p)
+		if err == nil {
+			addon.Activity("[FILE] Uploaded: %s duration: %s", p, time.Since(mark))
+		} else {
+			return
+		}
+		manifest := &api.AnalysisManifest{}
+		manifest.Issues = api.Ref{ID: issueFile.ID}
+		manifest.Dependencies = api.Ref{ID: depFile.ID}
+		appAnalysis := addon.Application.Analysis(application.ID)
+		mark = time.Now()
+		err = appAnalysis.Create(manifest)
+		if err == nil {
+			addon.Activity("Analysis reported. duration: %s", time.Since(mark))
+		} else {
 			return
 		}
 		//
@@ -121,9 +153,13 @@ func main() {
 		facts := addon.Application.Facts(application.ID)
 		facts.Source(Source)
 		err = facts.Replace(report.Facts())
-		if err != nil {
+		if err == nil {
+			addon.Activity("Facts updated.")
+		} else {
 			return
 		}
+
+		addon.Activity("Done.")
 
 		return
 	})
