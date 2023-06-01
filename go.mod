@@ -3,9 +3,10 @@ module github.com/konveyor/tackle2-addon-analyzer
 go 1.18
 
 require (
+	github.com/gin-gonic/gin v1.9.0
 	github.com/konveyor/analyzer-lsp v0.0.0-20230428140708-e32a4f09dc2d
 	github.com/konveyor/tackle2-addon v0.1.2-0.20230510185644-c600b133619a
-	github.com/konveyor/tackle2-hub v0.2.0-alpha.1.0.20230526175641-496faf4599ed
+	github.com/konveyor/tackle2-hub v0.2.0-alpha.2.0.20230601170349-69ffe6db0868
 	go.lsp.dev/uri v0.3.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -22,7 +23,6 @@ require (
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/getkin/kin-openapi v0.108.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.9.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
 	github.com/go-openapi/jsonreference v0.20.1 // indirect

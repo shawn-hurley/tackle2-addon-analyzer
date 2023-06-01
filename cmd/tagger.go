@@ -26,13 +26,13 @@ func (r *Tagger) AddOptions(options *command.Options) (err error) {
 //   - Ensures categories exist.
 //   - Endures tags exist.
 //   - Replaces associated tags (by source).
-func (r *Tagger) Update(appID uint, report Report) (err error) {
+func (r *Tagger) Update(appID uint, tags []string) (err error) {
 	addon.Activity("[TAG] Tagging Application %d.", appID)
-	catMap, err := r.ensureCategories(report)
+	catMap, err := r.ensureCategories(tags)
 	if err != nil {
 		return
 	}
-	wanted, err := r.ensureTags(catMap, report)
+	wanted, err := r.ensureTags(catMap, tags)
 	if err != nil {
 		return
 	}
@@ -46,18 +46,16 @@ func (r *Tagger) Update(appID uint, report Report) (err error) {
 //
 // ensureCategories ensures categories exist.
 // Returns the map of category names to IDs.
-func (r *Tagger) ensureCategories(report Report) (mp map[string]uint, err error) {
-	mp = map[string]uint{}
+func (r *Tagger) ensureCategories(tags []string) (catMap map[string]uint, err error) {
+	catMap = map[string]uint{}
 	wanted := []api.TagCategory{}
-	for _, ruleSet := range report {
-		for _, s := range ruleSet.Tags {
-			m := TagExp.FindStringSubmatch(s)
-			if len(m) == 4 {
-				mp[m[1]] = 0
-			}
+	for _, s := range tags {
+		m := TagExp.FindStringSubmatch(s)
+		if len(m) == 4 {
+			catMap[m[1]] = 0
 		}
 	}
-	for name := range mp {
+	for name := range catMap {
 		wanted = append(
 			wanted,
 			api.TagCategory{
@@ -70,7 +68,7 @@ func (r *Tagger) ensureCategories(report Report) (mp map[string]uint, err error)
 		if err != nil {
 			return
 		}
-		mp[cat.Name] = cat.ID
+		catMap[cat.Name] = cat.ID
 	}
 	return
 }
@@ -78,19 +76,17 @@ func (r *Tagger) ensureCategories(report Report) (mp map[string]uint, err error)
 //
 // ensureTags ensures tags exist.
 // Returns the wanted tag IDs.
-func (r *Tagger) ensureTags(catMap map[string]uint, report Report) (tags []uint, err error) {
+func (r *Tagger) ensureTags(catMap map[string]uint, tags []string) (tagIds []uint, err error) {
 	mp := map[TagRef]int{}
 	wanted := []api.Tag{}
-	for _, ruleSet := range report {
-		for _, s := range ruleSet.Tags {
-			m := TagExp.FindStringSubmatch(s)
-			if len(m) == 4 {
-				ref := TagRef{
-					Category: m[1],
-					Name:     m[3],
-				}
-				mp[ref] = 0
+	for _, s := range tags {
+		m := TagExp.FindStringSubmatch(s)
+		if len(m) == 4 {
+			ref := TagRef{
+				Category: m[1],
+				Name:     m[3],
 			}
+			mp[ref] = 0
 		}
 	}
 	for ref := range mp {
@@ -109,7 +105,7 @@ func (r *Tagger) ensureTags(catMap map[string]uint, report Report) (tags []uint,
 		if err != nil {
 			return
 		}
-		tags = append(tags, tag.ID)
+		tagIds = append(tagIds, tag.ID)
 	}
 	return
 }

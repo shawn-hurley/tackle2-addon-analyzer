@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gin-gonic/gin/binding"
 	"github.com/konveyor/tackle2-addon/ssh"
 	hub "github.com/konveyor/tackle2-hub/addon"
 	"github.com/konveyor/tackle2-hub/api"
@@ -93,48 +94,26 @@ func main() {
 		// Run analysis.
 		analyzer := Analyzer{}
 		analyzer.Data = d
-		report, err := analyzer.Run()
+		issues, err := analyzer.Run()
 		if err != nil {
 			return
 		}
 		depAnalyzer := DepAnalyzer{}
 		depAnalyzer.Data = d
-		depReport, err := depAnalyzer.Run()
+		deps, err := depAnalyzer.Run()
 		if err != nil {
 			return
 		}
 		//
 		// Post report.
-		p := path.Join(Dir, "issues.json")
-		err = report.Write(p)
-		if err != nil {
-			return
-		}
-		mark := time.Now()
-		issueFile, err := addon.File.Put(p)
-		if err == nil {
-			addon.Activity("[FILE] Uploaded: %s duration: %s", p, time.Since(mark))
-		} else {
-			return
-		}
-		p = path.Join(Dir, "deps.json")
-		err = depReport.Write(p)
-		if err != nil {
-			return
-		}
-		mark = time.Now()
-		depFile, err := addon.File.Put(p)
-		if err == nil {
-			addon.Activity("[FILE] Uploaded: %s duration: %s", p, time.Since(mark))
-		} else {
-			return
-		}
-		manifest := &api.AnalysisManifest{}
-		manifest.Issues = api.Ref{ID: issueFile.ID}
-		manifest.Dependencies = api.Ref{ID: depFile.ID}
 		appAnalysis := addon.Application.Analysis(application.ID)
-		mark = time.Now()
-		err = appAnalysis.Create(manifest)
+		mark := time.Now()
+		analysis := &api.Analysis{}
+		err = appAnalysis.Create(
+			analysis,
+			binding.MIMEYAML,
+			issues.Reader(),
+			deps.Reader())
 		if err == nil {
 			addon.Activity("Analysis reported. duration: %s", time.Since(mark))
 		} else {
@@ -143,7 +122,7 @@ func main() {
 		//
 		// Tags.
 		if d.Tagger.Enabled {
-			err = d.Tagger.Update(application.ID, report)
+			err = d.Tagger.Update(application.ID, issues.Tags())
 			if err != nil {
 				return
 			}
@@ -152,7 +131,7 @@ func main() {
 		// Facts
 		facts := addon.Application.Facts(application.ID)
 		facts.Source(Source)
-		err = facts.Replace(report.Facts())
+		err = facts.Replace(issues.Facts())
 		if err == nil {
 			addon.Activity("Facts updated.")
 		} else {
