@@ -12,14 +12,13 @@ import (
 )
 
 var (
-	addon        = hub.Addon
-	BinDir       = ""
-	SourceDir    = ""
-	Dir          = ""
-	M2Dir        = ""
-	RuleDir      = ""
-	SettingsPath = ""
-	Source       = "Analysis"
+	addon     = hub.Addon
+	BinDir    = ""
+	SourceDir = ""
+	Dir       = ""
+	M2Dir     = ""
+	RuleDir   = ""
+	Source    = "Analysis"
 )
 
 func init() {
@@ -28,7 +27,6 @@ func init() {
 	BinDir = path.Join(Dir, "bin")
 	RuleDir = path.Join(Dir, "rules")
 	M2Dir = "/cache/m2"
-	SettingsPath = path.Join(Dir, "opt", "settings.yaml")
 }
 
 type SoftError = hub.SoftError
@@ -41,7 +39,7 @@ type Data struct {
 	// Scope options.
 	Scope Scope `json:"scope"`
 	// Rules options.
-	Rules *Rules `json:"rules"`
+	Rules Rules `json:"rules"`
 	// Tagger options.
 	Tagger Tagger `json:"tagger"`
 }
