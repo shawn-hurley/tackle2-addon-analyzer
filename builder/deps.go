@@ -1,12 +1,17 @@
 package builder
 
 import (
-	"github.com/konveyor/analyzer-lsp/dependency/dependency"
+	"github.com/konveyor/analyzer-lsp/provider"
 	"github.com/konveyor/tackle2-hub/api"
 	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 )
+
+type DepItem struct {
+	Provider     string         `yaml:"provider"`
+	Dependencies []provider.Dep `yaml:"dependencies"`
+}
 
 //
 // Deps builds dependencies.
@@ -40,22 +45,24 @@ func (b *Deps) Write(writer io.Writer) (err error) {
 		return
 	}
 	encoder := yaml.NewEncoder(writer)
-	for _, d := range input {
-		_ = encoder.Encode(
-			&api.TechDependency{
-				Indirect: d.Indirect,
-				Name:     d.Name,
-				Version:  d.Version,
-				SHA:      d.SHA,
-			})
+	for _, p := range input {
+		for _, d := range p.Dependencies {
+			_ = encoder.Encode(
+				&api.TechDependency{
+					Indirect: d.Indirect,
+					Name:     d.Name,
+					Version:  d.Version,
+					SHA:      d.ResolvedIdentifier,
+				})
+		}
 	}
 	return
 }
 
 //
 // read dependencies.
-func (b *Deps) read() (input []dependency.Dep, err error) {
-	input = []dependency.Dep{}
+func (b *Deps) read() (input []DepItem, err error) {
+	input = []DepItem{}
 	f, err := os.Open(b.Path)
 	if err != nil {
 		return

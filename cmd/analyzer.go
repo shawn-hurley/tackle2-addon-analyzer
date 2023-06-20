@@ -15,12 +15,8 @@ type Analyzer struct {
 //
 // Run analyzer.
 func (r *Analyzer) Run() (b *builder.Issues, err error) {
-	bin := path.Join(
-		Dir,
-		"opt",
-		"konveyor-analyzer")
 	output := path.Join(Dir, "report.yaml")
-	cmd := command.Command{Path: bin}
+	cmd := command.Command{Path: "/usr/bin/konveyor-analyzer"}
 	cmd.Options, err = r.options(output)
 	if err != nil {
 		return
@@ -37,13 +33,13 @@ func (r *Analyzer) Run() (b *builder.Issues, err error) {
 // options builds Analyzer options.
 func (r *Analyzer) options(output string) (options command.Options, err error) {
 	settings := &Settings{}
-	err = settings.Read(SettingsPath)
+	err = settings.Read(SETTINGS)
 	if err != nil {
 		return
 	}
 	options = command.Options{
 		"--provider-settings",
-		SettingsPath,
+		SETTINGS,
 		"--output-file",
 		output,
 	}
@@ -55,17 +51,15 @@ func (r *Analyzer) options(output string) (options command.Options, err error) {
 	if err != nil {
 		return
 	}
-	if r.Rules != nil {
-		err = r.Rules.AddOptions(&options)
-		if err != nil {
-			return
-		}
+	err = r.Rules.AddOptions(&options)
+	if err != nil {
+		return
 	}
 	err = r.Scope.AddOptions(&options)
 	if err != nil {
 		return
 	}
-	err = settings.Write(SettingsPath)
+	err = settings.Write(SETTINGS)
 	if err != nil {
 		return
 	}
@@ -81,12 +75,8 @@ type DepAnalyzer struct {
 //
 // Run analyzer.
 func (r *DepAnalyzer) Run() (b *builder.Deps, err error) {
-	bin := path.Join(
-		Dir,
-		"opt",
-		"konveyor-analyzer-dep")
 	output := path.Join(Dir, "deps.yaml")
-	cmd := command.Command{Path: bin}
+	cmd := command.Command{Path: "/usr/bin/konveyor-analyzer-dep"}
 	cmd.Options, err = r.options(output)
 	if err != nil {
 		return
@@ -103,13 +93,13 @@ func (r *DepAnalyzer) Run() (b *builder.Deps, err error) {
 // options builds Analyzer options.
 func (r *DepAnalyzer) options(output string) (options command.Options, err error) {
 	settings := &Settings{}
-	err = settings.Read(SettingsPath)
+	err = settings.Read(SETTINGS)
 	if err != nil {
 		return
 	}
 	options = command.Options{
 		"--provider-settings",
-		SettingsPath,
+		SETTINGS,
 		"--output-file",
 		output,
 	}
@@ -117,7 +107,7 @@ func (r *DepAnalyzer) options(output string) (options command.Options, err error
 	if err != nil {
 		return
 	}
-	err = settings.Write(SettingsPath)
+	err = settings.Write(SETTINGS)
 	if err != nil {
 		return
 	}

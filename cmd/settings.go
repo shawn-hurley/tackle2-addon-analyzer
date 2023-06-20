@@ -1,15 +1,19 @@
 package main
 
 import (
-	"github.com/konveyor/analyzer-lsp/provider/lib"
+	"github.com/konveyor/analyzer-lsp/provider"
 	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 )
 
+const (
+	SETTINGS = "/analyzer-lsp/provider_settings.json"
+)
+
 //
 // Settings - provider settings file.
-type Settings []lib.Config
+type Settings []provider.Config
 
 //
 // Read file.
@@ -49,6 +53,6 @@ func (r *Settings) Write(path string) (err error) {
 func (r *Settings) Location(path string) {
 	for i := range *r {
 		p := &(*r)[i]
-		p.Location = path
+		p.InitConfig[0].Location = path
 	}
 }
