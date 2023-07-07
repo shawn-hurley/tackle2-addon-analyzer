@@ -1,10 +1,13 @@
 package main
 
 import (
+	"errors"
 	"github.com/konveyor/tackle2-addon-analyzer/builder"
 	"github.com/konveyor/tackle2-addon/command"
 	"path"
 )
+
+type RuleError = builder.RuleError
 
 //
 // Analyzer application analyzer.
@@ -24,6 +27,9 @@ func (r *Analyzer) Run() (b *builder.Issues, err error) {
 	b = &builder.Issues{Path: output}
 	err = cmd.Run()
 	if err != nil {
+		if errors.Is(err, &RuleError{}) {
+			err.(*RuleError).Report()
+		}
 		return
 	}
 	return
@@ -33,13 +39,13 @@ func (r *Analyzer) Run() (b *builder.Issues, err error) {
 // options builds Analyzer options.
 func (r *Analyzer) options(output string) (options command.Options, err error) {
 	settings := &Settings{}
-	err = settings.Read(SETTINGS)
+	err = settings.Read()
 	if err != nil {
 		return
 	}
 	options = command.Options{
 		"--provider-settings",
-		SETTINGS,
+		settings.path(),
 		"--output-file",
 		output,
 	}
@@ -59,10 +65,11 @@ func (r *Analyzer) options(output string) (options command.Options, err error) {
 	if err != nil {
 		return
 	}
-	err = settings.Write(SETTINGS)
+	err = settings.Write()
 	if err != nil {
 		return
 	}
+	settings.Report()
 	return
 }
 
@@ -93,13 +100,13 @@ func (r *DepAnalyzer) Run() (b *builder.Deps, err error) {
 // options builds Analyzer options.
 func (r *DepAnalyzer) options(output string) (options command.Options, err error) {
 	settings := &Settings{}
-	err = settings.Read(SETTINGS)
+	err = settings.Read()
 	if err != nil {
 		return
 	}
 	options = command.Options{
 		"--provider-settings",
-		SETTINGS,
+		settings.path(),
 		"--output-file",
 		output,
 	}
@@ -107,7 +114,7 @@ func (r *DepAnalyzer) options(output string) (options command.Options, err error
 	if err != nil {
 		return
 	}
-	err = settings.Write(SETTINGS)
+	err = settings.Write()
 	if err != nil {
 		return
 	}

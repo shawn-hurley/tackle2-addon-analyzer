@@ -1,8 +1,9 @@
 package builder
 
 import (
-	"encoding/json"
+	"fmt"
 	output "github.com/konveyor/analyzer-lsp/output/v1/konveyor"
+	hub "github.com/konveyor/tackle2-hub/addon"
 	"github.com/konveyor/tackle2-hub/api"
 	"go.lsp.dev/uri"
 	"gopkg.in/yaml.v3"
@@ -10,11 +11,16 @@ import (
 	"os"
 )
 
+var (
+	addon = hub.Addon
+)
+
 //
 // Issues builds issues and facts.
 type Issues struct {
-	facts []api.Fact
-	Path  string
+	ruleErr RuleError
+	facts   []api.Fact
+	Path    string
 }
 
 //
@@ -44,6 +50,10 @@ func (b *Issues) Write(writer io.Writer) (err error) {
 	}
 	encoder := yaml.NewEncoder(writer)
 	for _, ruleset := range input {
+		b.ruleErr.Append(ruleset)
+		if b.ruleErr.NotEmpty() {
+			continue
+		}
 		for ruleid, v := range ruleset.Violations {
 			issue := api.Issue{
 				RuleSet:     ruleset.Name,
@@ -80,6 +90,13 @@ func (b *Issues) Write(writer io.Writer) (err error) {
 			}
 			_ = encoder.Encode(&issue)
 		}
+	}
+	if err != nil {
+		return
+	}
+	if b.ruleErr.NotEmpty() {
+		err = &b.ruleErr
+		return
 	}
 	return
 }
@@ -124,24 +141,46 @@ func (b *Issues) Tags() (tags []string) {
 
 //
 // Facts builds facts.
-func (b *Issues) Facts() (facts []api.Fact) {
-	input, err := b.read()
-	if err != nil {
+func (b *Issues) Facts() (facts api.FactMap) {
+	return
+}
+
+//
+// RuleError reported by the analyzer.
+type RuleError struct {
+	hub.SoftError
+	items []string
+}
+
+func (e *RuleError) Error() (s string) {
+	s = fmt.Sprintf(
+		"Analyser reported %d errors.",
+		len(e.items))
+	return
+}
+
+func (e *RuleError) Is(err error) (matched bool) {
+	_, matched = err.(*RuleError)
+	return
+}
+
+func (e *RuleError) Append(ruleset output.RuleSet) {
+	for s, _ := range ruleset.Errors {
+		e.items = append(e.items, s)
+	}
+}
+
+func (e *RuleError) NotEmpty() (b bool) {
+	return len(e.items) > 0
+}
+
+func (e *RuleError) Report() {
+	if len(e.items) == 0 {
 		return
 	}
-	for _, r := range input {
-		for _, v := range r.Violations {
-			mp := make(map[string]interface{})
-			_ = json.Unmarshal(v.Extras, &mp)
-			for k, v := range mp {
-				facts = append(
-					facts,
-					api.Fact{
-						Key:   k,
-						Value: v,
-					})
-			}
-		}
+	addon.Activity("Analyzer reported:")
+	for _, s := range e.items {
+		addon.Activity("> [ERROR] %s.", s)
+		addon.Error("Error", s)
 	}
-	return
 }
