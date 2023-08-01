@@ -1,11 +1,16 @@
 package main
 
 import (
+	"errors"
 	"github.com/konveyor/analyzer-lsp/provider"
+	hub "github.com/konveyor/tackle2-hub/addon"
+	"github.com/konveyor/tackle2-hub/api"
 	"gopkg.in/yaml.v2"
 	"io"
 	"os"
 	"path"
+	"strconv"
+	"strings"
 )
 
 //
@@ -79,6 +84,83 @@ func (r *Settings) MavenSettings(path string) {
 			p.InitConfig[0].ProviderSpecificConfig["mavenSettingsFile"] = path
 		}
 	}
+}
+
+//
+// ProxySettings set proxy settings.
+func (r *Settings) ProxySettings() (err error) {
+	var http, https string
+	var excluded, noproxy []string
+	http, excluded, err = r.getProxy("http")
+	if err == nil {
+		noproxy = append(
+			noproxy,
+			excluded...)
+	} else {
+		return
+	}
+	https, excluded, err = r.getProxy("https")
+	if err == nil {
+		noproxy = append(
+			noproxy,
+			excluded...)
+	} else {
+		return
+	}
+	for i := range *r {
+		p := &(*r)[i]
+		switch p.Name {
+		case "java":
+			d := p.InitConfig[0].ProviderSpecificConfig
+			if http != "" {
+				d["httpproxy"] = http
+			}
+			if https != "" {
+				d["httpsproxy"] = https
+			}
+			if len(noproxy) > 0 {
+				d["noproxy"] = strings.Join(noproxy, ",")
+			}
+		}
+	}
+	return
+}
+
+//
+// getProxy set proxy settings.
+func (r *Settings) getProxy(kind string) (url string, excluded []string, err error) {
+	var p *api.Proxy
+	var id *api.Identity
+	var user, password string
+	p, err = addon.Proxy.Find(kind)
+	if err != nil {
+		if errors.Is(err, &hub.NotFound{}) {
+			err = nil
+			return
+		}
+	}
+	if p.Host == "" {
+		return
+	}
+	if p.Identity != nil {
+		id, err = addon.Identity.Get(p.Identity.ID)
+		if err == nil {
+			user = id.User
+			password = id.Password
+		} else {
+			return
+		}
+	}
+	host := p.Host
+	excluded = p.Excluded
+	if user != "" && password != "" {
+		host = user + ":" + password + "@" + host
+	}
+	if p.Port > 0 {
+		host += ":" + strconv.Itoa(p.Port)
+	}
+	url = kind + "://" + host
+	return
 }
 
 //
