@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"github.com/konveyor/analyzer-lsp/provider"
+	"github.com/konveyor/tackle2-addon/command"
 	"github.com/konveyor/tackle2-addon/repository"
 	"github.com/konveyor/tackle2-hub/api"
 	"github.com/konveyor/tackle2-hub/nas"
@@ -14,10 +15,11 @@ import (
 //
 // Mode settings.
 type Mode struct {
-	Binary     bool   `json:"binary"`
-	Artifact   string `json:"artifact"`
-	WithDeps   bool   `json:"withDeps"`
-	Repository repository.SCM
+	Binary        bool   `json:"binary"`
+	Artifact      string `json:"artifact"`
+	WithDeps      bool   `json:"withDeps"`
+	WithKnownLibs bool   `json:"withKnownLibs"`
+	Repository    repository.SCM
 	//
 	path struct {
 		appDir string
@@ -55,17 +57,30 @@ func (r *Mode) Build(application *api.Application) (err error) {
 
 //
 // AddOptions adds analyzer options.
-func (r *Mode) AddOptions(settings *Settings) (err error) {
+func (r *Mode) AddOptions(options *command.Options, settings *Settings) (err error) {
 	if r.WithDeps {
 		settings.MavenSettings(r.path.maven.settings)
 		settings.Mode(provider.FullAnalysisMode)
 	} else {
 		settings.Mode(provider.SourceOnlyAnalysisMode)
+		options.Add("--no-dependency-rules")
 	}
 	if r.Binary {
 		settings.Location(r.path.binary)
 	} else {
 		settings.Location(r.path.appDir)
+	}
+	return
+}
+
+//
+// AddDepOptions adds analyzer-dep options.
+func (r *Mode) AddDepOptions(options *command.Options, settings *Settings) (err error) {
+	settings.Location(r.path.appDir)
+	if !r.WithKnownLibs {
+		options.Add(
+			"--dep-label-selector",
+			"!konveyor.io/dep-source=open-source")
 	}
 	return
 }
