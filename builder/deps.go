@@ -8,13 +8,11 @@ import (
 	"os"
 )
 
-//
 // Deps builds dependencies.
 type Deps struct {
 	Path string
 }
 
-//
 // Reader returns a reader.
 func (b *Deps) Reader() (r io.Reader) {
 	r, w := io.Pipe()
@@ -32,7 +30,6 @@ func (b *Deps) Reader() (r io.Reader) {
 	return
 }
 
-//
 // Write deps to the writer.
 func (b *Deps) Write(writer io.Writer) (err error) {
 	input, err := b.read()
@@ -54,7 +51,6 @@ func (b *Deps) Write(writer io.Writer) (err error) {
 	return
 }
 
-//
 // read dependencies.
 func (b *Deps) read() (input []output.DepsFlatItem, err error) {
 	input = []output.DepsFlatItem{}

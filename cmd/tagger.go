@@ -9,19 +9,16 @@ import (
 
 var TagExp = regexp.MustCompile("(.+)(=)(.+)")
 
-//
 // Tagger tags an application.
 type Tagger struct {
 	Enabled bool `json:"enabled"`
 }
 
-//
 // AddOptions adds analyzer options.
 func (r *Tagger) AddOptions(options *command.Options) (err error) {
 	return
 }
 
-//
 // Update updates application tags.
 //   - Ensures categories exist.
 //   - Endures tags exist.
@@ -43,7 +40,6 @@ func (r *Tagger) Update(appID uint, tags []string) (err error) {
 	return
 }
 
-//
 // ensureCategories ensures categories exist.
 // Returns the map of category names to IDs.
 func (r *Tagger) ensureCategories(tags []string) (catMap map[string]uint, err error) {
@@ -73,7 +69,6 @@ func (r *Tagger) ensureCategories(tags []string) (catMap map[string]uint, err er
 	return
 }
 
-//
 // ensureTags ensures tags exist.
 // Returns the wanted tag IDs.
 func (r *Tagger) ensureTags(catMap map[string]uint, tags []string) (tagIds []uint, err error) {
@@ -110,7 +105,6 @@ func (r *Tagger) ensureTags(catMap map[string]uint, tags []string) (tagIds []uin
 	return
 }
 
-//
 // ensureAssociated ensure wanted tags are associated.
 func (r *Tagger) ensureAssociated(appID uint, wanted []uint) (err error) {
 	tags := addon.Application.Tags(appID)
@@ -119,7 +113,6 @@ func (r *Tagger) ensureAssociated(appID uint, wanted []uint) (err error) {
 	return
 }
 
-//
 // TagRef -
 type TagRef struct {
 	Category string `json:"category"`

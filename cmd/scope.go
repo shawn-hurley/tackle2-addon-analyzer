@@ -2,7 +2,6 @@ package main
 
 import "github.com/konveyor/tackle2-addon/command"
 
-//
 // Scope settings.
 type Scope struct {
 	WithKnownLibs bool `json:"withKnownLibs"`
@@ -12,7 +11,6 @@ type Scope struct {
 	} `json:"packages"`
 }
 
-//
 // AddOptions adds analyzer options.
 func (r *Scope) AddOptions(options *command.Options) (err error) {
 	if !r.WithKnownLibs {

@@ -8,13 +8,11 @@ import (
 
 type RuleError = builder.RuleError
 
-//
 // Analyzer application analyzer.
 type Analyzer struct {
 	*Data
 }
 
-//
 // Run analyzer.
 func (r *Analyzer) Run() (b *builder.Issues, err error) {
 	output := path.Join(Dir, "report.yaml")
@@ -28,7 +26,6 @@ func (r *Analyzer) Run() (b *builder.Issues, err error) {
 	return
 }
 
-//
 // options builds Analyzer options.
 func (r *Analyzer) options(output string) (options command.Options, err error) {
 	settings := &Settings{}
@@ -70,13 +67,11 @@ func (r *Analyzer) options(output string) (options command.Options, err error) {
 	return
 }
 
-//
 // DepAnalyzer application analyzer.
 type DepAnalyzer struct {
 	*Data
 }
 
-//
 // Run analyzer.
 func (r *DepAnalyzer) Run() (b *builder.Deps, err error) {
 	output := path.Join(Dir, "deps.yaml")
@@ -93,7 +88,6 @@ func (r *DepAnalyzer) Run() (b *builder.Deps, err error) {
 	return
 }
 
-//
 // options builds Analyzer options.
 func (r *DepAnalyzer) options(output string) (options command.Options, err error) {
 	settings := &Settings{}

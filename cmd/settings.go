@@ -13,11 +13,9 @@ import (
 	"strings"
 )
 
-//
 // Settings - provider settings file.
 type Settings []provider.Config
 
-//
 // Read file.
 func (r *Settings) Read() (err error) {
 	f, err := os.Open(r.path())
@@ -32,7 +30,6 @@ func (r *Settings) Read() (err error) {
 	return
 }
 
-//
 // Write file.
 func (r *Settings) Write() (err error) {
 	f, err := os.Create(r.path())
@@ -50,7 +47,6 @@ func (r *Settings) Write() (err error) {
 	return
 }
 
-//
 // Location update the location on each provider.
 func (r *Settings) Location(path string) {
 	for i := range *r {
@@ -59,7 +55,6 @@ func (r *Settings) Location(path string) {
 	}
 }
 
-//
 // Mode update the mode on each provider.
 func (r *Settings) Mode(mode provider.AnalysisMode) {
 	for i := range *r {
@@ -71,7 +66,6 @@ func (r *Settings) Mode(mode provider.AnalysisMode) {
 	}
 }
 
-//
 // MavenSettings set maven settings path.
 func (r *Settings) MavenSettings(path string) {
 	if path == "" {
@@ -86,7 +80,6 @@ func (r *Settings) MavenSettings(path string) {
 	}
 }
 
-//
 // ProxySettings set proxy settings.
 func (r *Settings) ProxySettings() (err error) {
 	var http, https string
@@ -126,7 +119,6 @@ func (r *Settings) ProxySettings() (err error) {
 	return
 }
 
-//
 // getProxy set proxy settings.
 func (r *Settings) getProxy(kind string) (url string, excluded []string, err error) {
 	var p *api.Proxy
@@ -163,14 +155,12 @@ func (r *Settings) getProxy(kind string) (url string, excluded []string, err err
 	return
 }
 
-//
 // Report self as activity.
 func (r *Settings) Report() {
 	b, _ := yaml.Marshal(r)
 	addon.Activity("Settings: %s\n%s", r.path(), string(b))
 }
 
-//
 // Path
 func (r *Settings) path() (p string) {
 	return path.Join(OptDir, "settings.json")
