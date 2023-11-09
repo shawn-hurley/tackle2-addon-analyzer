@@ -15,11 +15,9 @@ import (
 
 type History = map[uint]byte
 
-//
 // LvRegex - Label value regex.
 var LvRegex = regexp.MustCompile(`(\D+)(\d(?:[\d\.]*\d)?)([\+-])?$`)
 
-//
 // Rules settings.
 type Rules struct {
 	Path       string          `json:"path"`
@@ -29,7 +27,6 @@ type Rules struct {
 	rules      []string
 }
 
-//
 // Build assets.
 func (r *Rules) Build() (err error) {
 	err = r.addFiles()
@@ -51,7 +48,6 @@ func (r *Rules) Build() (err error) {
 	return
 }
 
-//
 // AddOptions adds analyzer options.
 func (r *Rules) AddOptions(options *command.Options) (err error) {
 	for _, path := range r.rules {
@@ -64,7 +60,6 @@ func (r *Rules) AddOptions(options *command.Options) (err error) {
 	return
 }
 
-//
 // addFiles add uploaded rules files.
 func (r *Rules) addFiles() (err error) {
 	if r.Path == "" {
@@ -84,7 +79,6 @@ func (r *Rules) addFiles() (err error) {
 	return
 }
 
-//
 // addRuleSets adds rulesets and their dependencies.
 func (r *Rules) addRuleSets() (err error) {
 	history := make(History)
@@ -117,7 +111,6 @@ func (r *Rules) addRuleSets() (err error) {
 	return
 }
 
-//
 // addDeps adds ruleSet dependencies.
 func (r *Rules) addDeps(ruleSet *api.RuleSet, history History) (err error) {
 	for _, ref := range ruleSet.DependsOn {
@@ -150,7 +143,6 @@ func (r *Rules) addDeps(ruleSet *api.RuleSet, history History) (err error) {
 	return
 }
 
-//
 // addRules adds rules
 func (r *Rules) addRules(ruleset *api.RuleSet) (err error) {
 	ruleDir := path.Join(
@@ -183,7 +175,6 @@ func (r *Rules) addRules(ruleset *api.RuleSet) (err error) {
 	return
 }
 
-//
 // addRuleSetRepository adds ruleset repository.
 func (r *Rules) addRuleSetRepository(ruleset *api.RuleSet) (err error) {
 	if ruleset.Repository == nil {
@@ -218,7 +209,6 @@ func (r *Rules) addRuleSetRepository(ruleset *api.RuleSet) (err error) {
 	return
 }
 
-//
 // addRepository adds custom repository.
 func (r *Rules) addRepository() (err error) {
 	if r.Repository == nil {
@@ -251,7 +241,6 @@ func (r *Rules) addRepository() (err error) {
 	return
 }
 
-//
 // addSelector adds label selector.
 func (r *Rules) addSelector(options *command.Options) (err error) {
 	ruleSelector := RuleSelector{Included: r.Labels.Included}
@@ -262,7 +251,6 @@ func (r *Rules) addSelector(options *command.Options) (err error) {
 	return
 }
 
-//
 // convert windup rules.
 func (r *Rules) convert() (err error) {
 	output := path.Join(RuleDir, "converted")
@@ -288,14 +276,12 @@ func (r *Rules) convert() (err error) {
 	return
 }
 
-//
 // Labels collection.
 type Labels struct {
 	Included []string `json:"included,omitempty"`
 	Excluded []string `json:"excluded,omitempty"`
 }
 
-//
 // RuleSets returns a list of ruleSets matching the 'included' labels.
 func (r *Labels) RuleSets() (matched []api.RuleSet, err error) {
 	mapped, err := r.ruleSetMap()
@@ -314,7 +300,6 @@ func (r *Labels) RuleSets() (matched []api.RuleSet, err error) {
 	return
 }
 
-//
 // ruleSetMap returns a populated RuleSetMap.
 func (r *Labels) ruleSetMap() (mp RuleSetMap, err error) {
 	mp = make(RuleSetMap)
@@ -334,11 +319,9 @@ func (r *Labels) ruleSetMap() (mp RuleSetMap, err error) {
 	return
 }
 
-//
 // RuleSetMap is a map of labels mapped to ruleSets with those labels.
 type RuleSetMap map[string][]api.RuleSet
 
-//
 // Label formatted labels.
 // Formats:
 // - name
@@ -347,7 +330,6 @@ type RuleSetMap map[string][]api.RuleSet
 // - namespace/name=value
 type Label string
 
-//
 // Namespace returns the (optional) namespace.
 func (r Label) Namespace() (ns string) {
 	s := string(r)
@@ -358,7 +340,6 @@ func (r Label) Namespace() (ns string) {
 	return
 }
 
-//
 // Name returns the name.
 func (r Label) Name() (n string) {
 	s := string(r)
@@ -367,7 +348,6 @@ func (r Label) Name() (n string) {
 	return
 }
 
-//
 // Value returns the (optional) value.
 func (r Label) Value() (v string) {
 	s := string(r)
@@ -379,7 +359,6 @@ func (r Label) Value() (v string) {
 	return
 }
 
-//
 // Match returns true when matched.
 // Values may contain version expressions.
 func (r Label) Match(other Label) (matched bool) {
@@ -412,7 +391,6 @@ func (r Label) Match(other Label) (matched bool) {
 	return
 }
 
-//
 // Eq returns true when equal.
 func (r Label) Eq(other Label) (matched bool) {
 	matched = r.Namespace() != other.Namespace() ||
@@ -421,14 +399,12 @@ func (r Label) Eq(other Label) (matched bool) {
 	return
 }
 
-//
 // RuleSelector - Label-based rule selector.
 type RuleSelector struct {
 	Included []string
 	Excluded []string
 }
 
-//
 // String returns string representation.
 func (r *RuleSelector) String() (selector string) {
 	var other, sources, targets []string
@@ -458,7 +434,6 @@ func (r *RuleSelector) String() (selector string) {
 	return
 }
 
-//
 // join clauses.
 func (r *RuleSelector) join(operator string, operands ...string) (joined string) {
 	var packed []string
@@ -477,7 +452,6 @@ func (r *RuleSelector) join(operator string, operands ...string) (joined string)
 	return
 }
 
-//
 // unique returns unique strings.
 func (r *RuleSelector) unique(in []string) (out []string) {
 	mp := make(map[string]int)

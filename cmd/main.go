@@ -32,7 +32,6 @@ func init() {
 	M2Dir = "/cache/m2"
 }
 
-//
 // Data Addon data passed in the secret.
 type Data struct {
 	// Mode options.
@@ -45,7 +44,6 @@ type Data struct {
 	Tagger Tagger `json:"tagger"`
 }
 
-//
 // main
 func main() {
 	addon.Run(func() (err error) {

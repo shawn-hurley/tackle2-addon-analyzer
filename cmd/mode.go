@@ -2,17 +2,17 @@ package main
 
 import (
 	"errors"
+	"os"
+	"path"
+	"strings"
+
 	"github.com/konveyor/analyzer-lsp/provider"
 	"github.com/konveyor/tackle2-addon/command"
 	"github.com/konveyor/tackle2-addon/repository"
 	"github.com/konveyor/tackle2-hub/api"
 	"github.com/konveyor/tackle2-hub/nas"
-	"os"
-	"path"
-	"strings"
 )
 
-//
 // Mode settings.
 type Mode struct {
 	Binary     bool   `json:"binary"`
@@ -29,36 +29,46 @@ type Mode struct {
 	}
 }
 
-//
 // Build assets.
 func (r *Mode) Build(application *api.Application) (err error) {
+	binDir := path.Join(BinDir, "maven")
+	maven := &repository.Maven{
+		M2Dir:  M2Dir,
+		BinDir: binDir,
+		Remote: repository.Remote{
+			Identities: application.Identities,
+		},
+	}
+	path, err := maven.CreateSettingsFile()
+	if err != nil {
+		return err
+	}
+	r.path.maven.settings = path
+	addon.Activity(
+		"[MVN] Using settings file(path=%v).",
+		path)
+
 	if !r.Binary {
 		err = r.fetchRepository(application)
-		if err != nil {
-			return
-		}
-		err = r.buildMavenSettings(application)
-		if err != nil {
-			return
-		}
-	} else {
-		if r.Artifact != "" {
-			err = r.getArtifact()
-			return
-		}
-		if application.Binary != "" {
-			err = r.mavenArtifact(application)
-			return
-		}
+		return
+	}
+
+	if r.Artifact != "" {
+		err = r.getArtifact()
+		return
+	}
+
+	if application.Binary != "" {
+		err = r.mavenArtifact(application, maven)
+		return
 	}
 	return
 }
 
-//
 // AddOptions adds analyzer options.
 func (r *Mode) AddOptions(options *command.Options, settings *Settings) (err error) {
+	settings.MavenSettings(r.path.maven.settings)
 	if r.WithDeps {
-		settings.MavenSettings(r.path.maven.settings)
 		settings.Mode(provider.FullAnalysisMode)
 	} else {
 		settings.Mode(provider.SourceOnlyAnalysisMode)
@@ -72,7 +82,6 @@ func (r *Mode) AddOptions(options *command.Options, settings *Settings) (err err
 	return
 }
 
-//
 // AddDepOptions adds analyzer-dep options.
 func (r *Mode) AddDepOptions(options *command.Options, settings *Settings) (err error) {
 	if r.Binary {
@@ -83,7 +92,6 @@ func (r *Mode) AddDepOptions(options *command.Options, settings *Settings) (err 
 	return
 }
 
-//
 // fetchRepository get SCM repository.
 func (r *Mode) fetchRepository(application *api.Application) (err error) {
 	if application.Repository == nil {
@@ -110,7 +118,6 @@ func (r *Mode) fetchRepository(application *api.Application) (err error) {
 	return
 }
 
-//
 // getArtifact get uploaded artifact.
 func (r *Mode) getArtifact() (err error) {
 	bucket := addon.Bucket()
@@ -119,33 +126,23 @@ func (r *Mode) getArtifact() (err error) {
 	return
 }
 
-//
 // mavenArtifact get maven artifact.
-func (r *Mode) mavenArtifact(application *api.Application) (err error) {
-	binDir := path.Join(BinDir, "maven")
-	maven := repository.Maven{
-		M2Dir:  M2Dir,
-		BinDir: binDir,
-		Remote: repository.Remote{
-			Identities: application.Identities,
-		},
-	}
+func (r *Mode) mavenArtifact(application *api.Application, maven *repository.Maven) (err error) {
 	err = maven.FetchArtifact(application.Binary)
 	if err != nil {
 		return
 	}
-	dir, nErr := os.ReadDir(binDir)
+	dir, nErr := os.ReadDir(maven.BinDir)
 	if nErr != nil {
 		err = nErr
 		return
 	}
 	if len(dir) > 0 {
-		r.path.binary = path.Join(binDir, dir[0].Name())
+		r.path.binary = path.Join(maven.BinDir, dir[0].Name())
 	}
 	return
 }
 
-//
 // buildMavenSettings creates maven settings.
 func (r *Mode) buildMavenSettings(application *api.Application) (err error) {
 	id, found, nErr := addon.Application.FindIdentity(
@@ -182,6 +179,5 @@ func (r *Mode) buildMavenSettings(application *api.Application) (err error) {
 	if err != nil {
 		return
 	}
-	r.path.maven.settings = p
 	return
 }

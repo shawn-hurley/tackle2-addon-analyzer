@@ -17,7 +17,6 @@ var (
 	addon = hub.Addon
 )
 
-//
 // Issues builds issues and facts.
 type Issues struct {
 	ruleErr RuleError
@@ -25,7 +24,6 @@ type Issues struct {
 	Path    string
 }
 
-//
 // Reader returns a reader.
 func (b *Issues) Reader() (r io.Reader) {
 	r, w := io.Pipe()
@@ -43,7 +41,6 @@ func (b *Issues) Reader() (r io.Reader) {
 	return
 }
 
-//
 // Write issues to the writer.
 func (b *Issues) Write(writer io.Writer) (err error) {
 	input, err := b.read()
@@ -104,7 +101,6 @@ func (b *Issues) Write(writer io.Writer) (err error) {
 	return
 }
 
-//
 // read ruleSets.
 func (b *Issues) read() (input []output.RuleSet, err error) {
 	input = []output.RuleSet{}
@@ -120,7 +116,6 @@ func (b *Issues) read() (input []output.RuleSet, err error) {
 	return
 }
 
-//
 // fileRef returns the file (relative) path.
 func (b *Issues) fileRef(in uri.URI) (s string) {
 	s = string(in)
@@ -131,7 +126,6 @@ func (b *Issues) fileRef(in uri.URI) (s string) {
 	return
 }
 
-//
 // Tags builds tags.
 func (b *Issues) Tags() (tags []string) {
 	input, err := b.read()
@@ -144,13 +138,11 @@ func (b *Issues) Tags() (tags []string) {
 	return
 }
 
-//
 // Facts builds facts.
 func (b *Issues) Facts() (facts api.FactMap) {
 	return
 }
 
-//
 // RuleError reported by the analyzer.
 type RuleError struct {
 	items map[string]string
