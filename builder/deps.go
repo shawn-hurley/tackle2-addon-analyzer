@@ -41,10 +41,12 @@ func (b *Deps) Write(writer io.Writer) (err error) {
 		for _, d := range p.Dependencies {
 			_ = encoder.Encode(
 				&api.TechDependency{
+					Provider: p.Provider,
 					Indirect: d.Indirect,
 					Name:     d.Name,
 					Version:  d.Version,
 					SHA:      d.ResolvedIdentifier,
+					Labels:   d.Labels,
 				})
 		}
 	}
