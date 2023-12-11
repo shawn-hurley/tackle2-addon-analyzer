@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/konveyor/analyzer-lsp/parser"
 	"github.com/konveyor/tackle2-addon/command"
 	"github.com/konveyor/tackle2-addon/repository"
 	"github.com/konveyor/tackle2-hub/api"
@@ -70,11 +71,27 @@ func (r *Rules) addFiles() (err error) {
 	if err != nil {
 		return
 	}
-	r.rules = append(r.rules, ruleDir)
+	addon.Activity(
+		"[RULESET] fetching: %s",
+		r.Path)
 	bucket := addon.Bucket()
 	err = bucket.Get(r.Path, ruleDir)
 	if err != nil {
 		return
+	}
+	entries, err := os.ReadDir(ruleDir)
+	if err != nil {
+		return
+	}
+	for _, ent := range entries {
+		if ent.Name() == parser.RULE_SET_GOLDEN_FILE_NAME {
+			r.rules = append(r.rules, ruleDir)
+			return
+		}
+	}
+	for _, ent := range entries {
+		p := path.Join(ruleDir, ent.Name())
+		r.rules = append(r.rules, p)
 	}
 	return
 }
