@@ -5,8 +5,8 @@ go 1.18
 require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/konveyor/analyzer-lsp v0.0.0-20230712145100-60dc2048444c
-	github.com/konveyor/tackle2-addon v0.3.0-beta.3.0.20231122051613-31d1afa8ce1c
-	github.com/konveyor/tackle2-hub v0.3.0-beta.2
+	github.com/konveyor/tackle2-addon v0.3.0-rc.2.0.20231219212054-1119ca451542
+	github.com/konveyor/tackle2-hub v0.3.0-rc.2.0.20231219211826-f09d0b24c0e6
 	github.com/onsi/gomega v1.27.6
 	github.com/rogpeppe/go-internal v1.10.0
 	go.lsp.dev/uri v0.3.0
@@ -57,7 +57,7 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
-	github.com/leodido/go-urn v1.2.3 // indirect
+	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-sqlite3 v1.14.17 // indirect
