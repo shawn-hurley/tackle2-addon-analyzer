@@ -15,7 +15,7 @@ do
   params+=("$p")
 done
 docker run \
-  --entrypoint /usr/bin/konveyor-analyzer-dep \
+  --entrypoint /usr/loca/bin/konveyor-analyzer-dep \
   -v ${addon}:${addon} \
   ${image} \
   "${params[@]}"
