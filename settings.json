@@ -1,7 +1,7 @@
 [
     {
         "name": "go",
-        "binaryPath": "/usr/lcoal/bin/generic-external-provider",
+        "binaryPath": "/usr/local/bin/generic-external-provider",
         "initConfig": [
             {
                 "analysisMode": "full",
