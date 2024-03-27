@@ -1,6 +1,7 @@
 name: tackle2-addon-analyzer CI
 
 on:
+  workflow_dispatch:
   push:
   pull_request:
 
