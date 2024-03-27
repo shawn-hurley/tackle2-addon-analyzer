@@ -6,8 +6,8 @@ Set environment variables:
 - The `TOKEN` must be set when auth is enabled in the hub.
 
 The addon runs analyzer (CLI) commands:
-- /usr/bin/konveyor-analyzer
-- /usr/bin/konveyor-analyzer-dep
+- /usr/local/bin/konveyor-analyzer
+- /usr/local/bin/konveyor-analyzer-dep
 
 These commands have dependencies that can be complicated to install and
 most developers won't want to install them in their development environment.
