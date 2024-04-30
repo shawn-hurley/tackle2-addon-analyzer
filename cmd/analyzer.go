@@ -17,7 +17,7 @@ type Analyzer struct {
 // Run analyzer.
 func (r *Analyzer) Run() (b *builder.Issues, err error) {
 	output := path.Join(Dir, "report.yaml")
-	cmd := command.New("/usr/local/bin/konveyor-analyzer")
+	cmd := command.New("/usr/bin/konveyor-analyzer")
 	cmd.Options, err = r.options(output)
 	if err != nil {
 		return
@@ -79,7 +79,7 @@ type DepAnalyzer struct {
 // Run analyzer.
 func (r *DepAnalyzer) Run() (b *builder.Deps, err error) {
 	output := path.Join(Dir, "deps.yaml")
-	cmd := command.New("/usr/local/bin/konveyor-analyzer-dep")
+	cmd := command.New("/usr/bin/konveyor-analyzer-dep")
 	cmd.Options, err = r.options(output)
 	if err != nil {
 		return

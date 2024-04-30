@@ -1,14 +1,14 @@
 [
     {
         "name": "go",
-        "binaryPath": "/usr/local/bin/generic-external-provider",
+        "binaryPath": "/usr/bin/generic-external-provider",
         "initConfig": [
             {
                 "analysisMode": "full",
                 "providerSpecificConfig": {
                     "name": "go",
                     "lspServerPath": "/root/go/bin/gopls",
-                    "dependencyProviderPath": "/usr/local/bin/golang-dependency-provider"
+                    "dependencyProviderPath": "/usr/bin/golang-dependency-provider"
             }
         }
         ]

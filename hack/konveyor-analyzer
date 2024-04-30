@@ -16,7 +16,7 @@ do
 done
 
 docker run \
-  --entrypoint /usr/local/bin/konveyor-analyzer \
+  --entrypoint konveyor-analyzer \
   -v ${addon}:${addon} \
   ${image} \
   "${params[@]}"
