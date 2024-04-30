@@ -29,3 +29,4 @@ jobs:
     uses: konveyor/ci/.github/workflows/global-ci.yml@main
     with:
       component_name: tackle2-addon-analyzer
+      api_tests_ref: release-0.3
