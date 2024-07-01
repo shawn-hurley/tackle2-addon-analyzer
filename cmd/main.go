@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin/binding"
+	"github.com/konveyor/tackle2-addon-analyzer/builder"
 	"github.com/konveyor/tackle2-addon/ssh"
 	hub "github.com/konveyor/tackle2-hub/addon"
 	"github.com/konveyor/tackle2-hub/api"
@@ -100,11 +101,15 @@ func main() {
 		if err != nil {
 			return
 		}
-		depAnalyzer := DepAnalyzer{}
-		depAnalyzer.Data = d
-		deps, err := depAnalyzer.Run()
-		if err != nil {
-			return
+
+		deps := &builder.Deps{}
+		if d.Mode.WithDeps {
+			depAnalyzer := DepAnalyzer{}
+			depAnalyzer.Data = d
+			deps, err = depAnalyzer.Run()
+			if err != nil {
+				return err
+			}
 		}
 		//
 		// Post report.
