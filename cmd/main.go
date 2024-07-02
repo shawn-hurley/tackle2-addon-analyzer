@@ -93,6 +93,15 @@ func main() {
 		if err != nil {
 			return
 		}
+		depAnalyzer := DepAnalyzer{}
+		depAnalyzer.Data = d
+		deps, err := depAnalyzer.Run()
+		if deps == nil {
+			deps = &builder.Deps{}
+		}
+		if err != nil && d.Mode.WithDeps {
+			return
+		}
 		//
 		// Run analysis.
 		analyzer := Analyzer{}
@@ -102,15 +111,6 @@ func main() {
 			return
 		}
 
-		deps := &builder.Deps{}
-		if d.Mode.WithDeps {
-			depAnalyzer := DepAnalyzer{}
-			depAnalyzer.Data = d
-			deps, err = depAnalyzer.Run()
-			if err != nil {
-				return err
-			}
-		}
 		//
 		// Post report.
 		appAnalysis := addon.Application.Analysis(application.ID)
