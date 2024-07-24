@@ -112,4 +112,4 @@ require (
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
-replace github.com/konveyor/tackle2-addon => github.com/shawn-hurley/tackle2-addon v0.0.0-20240724131130-19c4b966e58e
+replace github.com/konveyor/tackle2-addon => github.com/shawn-hurley/tackle2-addon v0.0.0-20240724234855-685b1a9514ec
