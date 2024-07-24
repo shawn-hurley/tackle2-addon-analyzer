@@ -139,8 +139,6 @@ github.com/klauspost/cpuid/v2 v2.2.4 h1:acbojRNwl3o09bUq+yDCtZFc1aiwaAAxtcn8YkZX
 github.com/klauspost/cpuid/v2 v2.2.4/go.mod h1:RVVoqg1df56z8g3pUjL/3lE5UfnlrJX8tyFgg4nqhuY=
 github.com/konveyor/analyzer-lsp v0.4.0-alpha.1.0.20240603131628-bc4ff29956a2 h1:jASTTOXjewf2qWDAqc4pqNrIC3g7r9BLvJeoXaOBogU=
 github.com/konveyor/analyzer-lsp v0.4.0-alpha.1.0.20240603131628-bc4ff29956a2/go.mod h1:GXkSykQ84oE1SyMvFko9s9wRn/FMdl4efLLWSjMX2nU=
-github.com/konveyor/tackle2-addon v0.4.0-alpha.1 h1:YgkA3fUAFeaV5K22WpcnxvdhWJxvE/y+Vqn6Z8NvPMs=
-github.com/konveyor/tackle2-addon v0.4.0-alpha.1/go.mod h1:d5jsa9qR1PKF8J7ZZcxfg9K+KFScu5YJQrp1Yzhjoss=
 github.com/konveyor/tackle2-hub v0.5.0-beta.1 h1:wauq0BdSFd6Uq78TUWbjNMHBv/MVyYruvhuQSKUV8OM=
 github.com/konveyor/tackle2-hub v0.5.0-beta.1/go.mod h1:5c5A3i/oARdUp1yo+iYJFFvsIlsbsVGBZT7/CQji9YY=
 github.com/kr/pretty v0.2.0/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
@@ -195,6 +193,8 @@ github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncj
 github.com/segmentio/ksuid v1.0.4 h1:sBo2BdShXjmcugAMwjugoGUdUV0pcxY5mW4xKRn3v4c=
 github.com/segmentio/ksuid v1.0.4/go.mod h1:/XUiZBD3kVx5SmUOl55voK5yeAbBNNIed+2O73XgrPE=
 github.com/sergi/go-diff v1.3.1 h1:xkr+Oxo4BOQKmkn/B9eMK0g5Kg/983T9DqqPHwYqD+8=
+github.com/shawn-hurley/tackle2-addon v0.0.0-20240724131130-19c4b966e58e h1:lBV/lHFvRhHLZ/4ZQyDmP7I3XfhWL9sf00LUIIC8rw4=
+github.com/shawn-hurley/tackle2-addon v0.0.0-20240724131130-19c4b966e58e/go.mod h1:d5jsa9qR1PKF8J7ZZcxfg9K+KFScu5YJQrp1Yzhjoss=
 github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5gKV8=
 github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=

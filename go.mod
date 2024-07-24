@@ -111,3 +111,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
+
+replace github.com/konveyor/tackle2-addon => github.com/shawn-hurley/tackle2-addon v0.0.0-20240724131130-19c4b966e58e
