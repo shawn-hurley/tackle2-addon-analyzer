@@ -51,6 +51,8 @@ type Data struct {
 	Rules Rules `json:"rules"`
 	// Tagger options.
 	Tagger Tagger `json:"tagger"`
+	// MavenSettings options
+	MavenSettings MavenGlobalSettings `json:"mavenSettings,omitempty"`
 }
 
 // main
@@ -88,6 +90,11 @@ func main() {
 			return
 		}
 		//
+		// Create the maven user settings.
+		d.MavenSettings = MavenGlobalSettings{
+			MavenRepoLocation: M2Dir,
+			SharedDir:         SharedDir,
+		}
 		// SSH
 		agent := ssh.Agent{}
 		err = agent.Start()
@@ -101,6 +108,10 @@ func main() {
 			return
 		}
 		err = d.Rules.Build()
+		if err != nil {
+			return
+		}
+		err = d.MavenSettings.Build()
 		if err != nil {
 			return
 		}

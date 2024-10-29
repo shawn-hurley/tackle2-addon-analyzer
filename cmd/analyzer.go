@@ -86,6 +86,10 @@ func (r *Analyzer) options(output, depOutput string) (options command.Options, e
 	if err != nil {
 		return
 	}
+	err = r.MavenSettings.UpdateSettings(settings)
+	if err != nil {
+		return
+	}
 	err = settings.Write()
 	if err != nil {
 		return
